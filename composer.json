@@ -1,0 +1,61 @@
+{
+    "name": "amarenkov/laravel-mutable-content-daisyui",
+    "description": "Blade components on daisyUI for amarenkov/laravel-mutable-content",
+    "type": "library",
+    "keywords": [
+        "laravel",
+        "blade",
+        "daisyui",
+        "tailwindcss",
+        "eloquent",
+        "jsonb",
+        "dynamic-fields",
+        "custom-fields"
+    ],
+    "homepage": "https://github.com/amarenkov/laravel-mutable-content-daisyui",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alexey Marenkov",
+            "email": "alex@marenkov.dev",
+            "homepage": "https://github.com/amarenkov"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/amarenkov/laravel-mutable-content-daisyui/issues",
+        "source": "https://github.com/amarenkov/laravel-mutable-content-daisyui"
+    },
+    "require": {
+        "php": "^8.4",
+        "amarenkov/laravel-mutable-content": "^0.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Amarenkov\\MutableContentDaisyUi\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Amarenkov\\MutableContentDaisyUi\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Amarenkov\\MutableContentDaisyUi\\MutableContentDaisyUiServiceProvider"
+            ]
+        },
+        "branch-alias": {
+            "dev-master": "0.1.x-dev"
+        }
+    },
+    "require-dev": {
+        "orchestra/testbench": "^11.0",
+        "phpunit/phpunit": "^12.0",
+        "larastan/larastan": "^3.0"
+    },
+    "scripts": {
+        "test": "phpunit",
+        "analyse": "phpstan analyse"
+    }
+}
