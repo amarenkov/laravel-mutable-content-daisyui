@@ -1,6 +1,7 @@
 # amarenkov/laravel-mutable-content-daisyui
 
 [![tests](https://github.com/amarenkov/laravel-mutable-content-daisyui/actions/workflows/tests.yml/badge.svg)](https://github.com/amarenkov/laravel-mutable-content-daisyui/actions/workflows/tests.yml)
+[![Packagist](https://img.shields.io/packagist/v/amarenkov/laravel-mutable-content-daisyui)](https://packagist.org/packages/amarenkov/laravel-mutable-content-daisyui)
 
 Blade components on [daisyUI](https://daisyui.com) for
 [`amarenkov/laravel-mutable-content`](https://github.com/amarenkov/laravel-mutable-content).
