@@ -5,6 +5,7 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: src/Livewire/ManageRecords.php
+			reportUnmatched: false
 
 		-
 			message: '#^Parameter \#1 \$view of function view expects view\-string\|null, string given\.$#'
