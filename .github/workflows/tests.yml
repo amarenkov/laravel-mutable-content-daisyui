@@ -2,9 +2,9 @@ name: tests
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
-    branches: [master]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -65,7 +65,7 @@ jobs:
           extensions: pdo_pgsql, pdo_mysql, intl
           coverage: none
 
-      - name: Use core from master
+      - name: Use core from main
         run: composer require "amarenkov/laravel-mutable-content:0.5.x-dev" --no-update --no-interaction
 
       - name: Install dependencies
@@ -87,7 +87,7 @@ jobs:
           extensions: pdo_pgsql, intl
           coverage: none
 
-      - name: Use core from master
+      - name: Use core from main
         run: composer require "amarenkov/laravel-mutable-content:0.5.x-dev" --no-update --no-interaction
 
       - name: Install dependencies

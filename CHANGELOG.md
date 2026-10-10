@@ -7,4 +7,4 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/amarenkov/laravel-mutable-content-daisyui/commits/master
+[Unreleased]: https://github.com/amarenkov/laravel-mutable-content-daisyui/commits/main
