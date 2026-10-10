@@ -1,6 +1,6 @@
 {
     "name": "amarenkov/laravel-mutable-content-daisyui",
-    "description": "Blade components on daisyUI for amarenkov/laravel-mutable-content",
+    "description": "Server-rendered Blade, Livewire and daisyUI screens for laravel-mutable-content: forms, tables and management of fields and lists of values.",
     "type": "library",
     "keywords": [
         "laravel",
@@ -10,7 +10,8 @@
         "eloquent",
         "jsonb",
         "dynamic-fields",
-        "custom-fields"
+        "custom-fields",
+        "livewire"
     ],
     "homepage": "https://github.com/amarenkov/laravel-mutable-content-daisyui",
     "license": "MIT",
