@@ -148,14 +148,14 @@ class LovsTest extends TestCase
             ->call('create')
             ->set('data.code', 'high')
             ->set('data.label', 'High')
-            ->set('data.icon', 'o-fire')
+            ->set('data.icon', 'flame')
             ->call('save')
             ->assertHasNoErrors();
 
         $item = Item::where('lov_id', $lov->id)->first();
 
         $this->assertSame('high', $item->code());
-        $this->assertSame('o-fire', $item->icon);
+        $this->assertSame('flame', $item->icon);
     }
 
     public function test_unknown_icon_is_rejected(): void
@@ -183,5 +183,18 @@ class LovsTest extends TestCase
             ->assertDispatched('mutable-content-notify', type: 'success');
 
         $this->assertEqualsCanonicalizing(['High', 'Low'], Item::where('lov_id', $lov->id)->get()->map->label()->all());
+    }
+
+    public function test_items_show_default_icons_of_the_package(): void
+    {
+        $component = Livewire::test(ManageItems::class, ['lov' => 'field_type']);
+
+        $item = Item::where('fields->code', 'int')->first();
+
+        $this->assertSame('hash', $component->instance()->getColumns()['icon']->getState($item));
+
+        $input = $component->instance()->getInputs()['icon'];
+
+        $this->assertSame('Default: hash', $input->getPlaceholder([], $item));
     }
 }

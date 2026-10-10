@@ -1,10 +1,18 @@
 <?php
 
 return [
+    'fields' => 'Fields',
+    'usage' => 'Usage',
+    'usage_title' => 'Usage of the :field field',
+    'usage_lov_helper' => 'The field will belong to the items of this LOV.',
+    'type' => 'Type',
+    'yes_lower' => 'yes',
+    'no_lower' => 'no',
     'lovs' => 'LOVs',
     'lov_items_title' => 'Items of the :lov LOV',
     'yes' => 'Yes',
     'no' => 'No',
+    'default_icon' => 'Default: :icon',
     'unlisted_code' => 'not in the LOV',
     'unlisted_codes_filter' => 'Unlisted codes',
 
@@ -23,6 +31,7 @@ return [
     'per_page' => 'Per page',
     'total' => 'Total: :count',
     'pagination' => 'Pagination',
+    'nothing_found' => 'Nothing found',
     'select_placeholder' => 'Select an option',
 
     'filters' => [
@@ -33,6 +42,37 @@ return [
         'without_them' => 'Only without them',
         'system_only' => 'System only',
         'non_system_only' => 'Non-system only',
+    ],
+
+    'tabs' => [
+        'all' => 'All',
+        'unbound' => 'Unbound',
+        'quick_filters' => 'Quick filters',
+        'selected' => 'Selected: :label',
+        'classes' => 'Classes',
+    ],
+
+    'settings' => [
+        'inherited' => 'As in the field: :value',
+        'display_unit' => 'Display unit',
+        'display_unit_helper' => 'The value is stored in ":unit" and entered and displayed in this unit.',
+        'link_by_code' => 'Link by code',
+        'link_by_code_helper' => 'The value is the object code, not the id. Cannot be changed for a field with data: stored values are not converted.',
+        'allow_unlisted_codes' => 'Allow unlisted codes',
+        'allow_unlisted_codes_helper' => 'A code missing from the LOV is accepted, stored as is and marked in the UI. Once an item with this code appears, the value links to it.',
+        'allow_unlisted_codes_object_helper' => 'A code with no matching object is accepted, stored as is and marked in the UI. Once an object with this code appears, the value links to it.',
+        'allow_zero' => 'Allow 0',
+        'allow_zero_helper' => 'If off, the value must be greater than zero.',
+
+        'describe' => [
+            'display_unit' => 'display in :unit',
+            'link_by_code' => 'link by code',
+            'link_by_id' => 'link by id',
+            'unlisted_codes' => 'unlisted codes',
+            'listed_codes_only' => 'listed codes only',
+            'allow_zero' => 'allow 0',
+            'no_zero' => 'no 0',
+        ],
     ],
 
     'create_items' => [

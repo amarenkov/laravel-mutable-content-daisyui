@@ -8,8 +8,10 @@ use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 
 use Amarenkov\MutableContent\Domain\Field\Lov\Type as DomainFieldType;
-use Amarenkov\MutableContent\Domain\LovRegistry;
 
+use Amarenkov\MutableContentDaisyUi\Helpers\IconHelper;
+use Amarenkov\MutableContentDaisyUi\Livewire\Fields\ManageFields;
+use Amarenkov\MutableContentDaisyUi\Livewire\Fields\ManageUsage;
 use Amarenkov\MutableContentDaisyUi\Livewire\Lovs\ManageItems;
 use Amarenkov\MutableContentDaisyUi\Livewire\Lovs\ManageLovs;
 
@@ -22,25 +24,25 @@ class MutableContentDaisyUiServiceProvider extends ServiceProvider
     protected function fieldTypeIcons(): array
     {
         return [
-            DomainFieldType::TYPE_UNDEFINED => 'o-question-mark-circle',
-            DomainFieldType::TYPE_STRING => 'o-pencil',
-            DomainFieldType::TYPE_TEXT => 'o-document-text',
-            DomainFieldType::TYPE_BOOL => 'o-check-circle',
-            DomainFieldType::TYPE_INT => 'o-hashtag',
-            DomainFieldType::TYPE_FLOAT => 'o-calculator',
-            DomainFieldType::TYPE_LOV => 'o-book-open',
-            DomainFieldType::TYPE_LOV_ITEM => 'o-list-bullet',
-            DomainFieldType::TYPE_ADDRESS => 'o-map-pin',
-            DomainFieldType::TYPE_OBJECT => 'o-link',
-            DomainFieldType::TYPE_WEIGHT => 'o-scale',
-            DomainFieldType::TYPE_DENSITY => 'o-cube',
-            DomainFieldType::TYPE_SURFACE_DENSITY => 'o-square-3-stack-3d',
-            DomainFieldType::TYPE_LENGTH => 'o-arrows-right-left',
-            DomainFieldType::TYPE_AREA => 'o-square-2-stack',
-            DomainFieldType::TYPE_VOLUME => 'o-cube-transparent',
-            DomainFieldType::TYPE_DATE => 'o-calendar',
-            DomainFieldType::TYPE_ICON => 'o-photo',
-            DomainFieldType::TYPE_SYSTEM => 'o-cog-6-tooth',
+            DomainFieldType::TYPE_UNDEFINED => 'circle-help',
+            DomainFieldType::TYPE_STRING => 'type',
+            DomainFieldType::TYPE_TEXT => 'file-text',
+            DomainFieldType::TYPE_BOOL => 'circle-check',
+            DomainFieldType::TYPE_INT => 'hash',
+            DomainFieldType::TYPE_FLOAT => 'calculator',
+            DomainFieldType::TYPE_LOV => 'book-open',
+            DomainFieldType::TYPE_LOV_ITEM => 'list',
+            DomainFieldType::TYPE_ADDRESS => 'map-pin',
+            DomainFieldType::TYPE_OBJECT => 'link',
+            DomainFieldType::TYPE_WEIGHT => 'scale',
+            DomainFieldType::TYPE_DENSITY => 'cuboid',
+            DomainFieldType::TYPE_SURFACE_DENSITY => 'layers',
+            DomainFieldType::TYPE_LENGTH => 'ruler',
+            DomainFieldType::TYPE_AREA => 'square-dashed',
+            DomainFieldType::TYPE_VOLUME => 'box',
+            DomainFieldType::TYPE_DATE => 'calendar',
+            DomainFieldType::TYPE_ICON => 'image',
+            DomainFieldType::TYPE_SYSTEM => 'settings',
         ];
     }
 
@@ -49,9 +51,7 @@ class MutableContentDaisyUiServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__.'/../config/mutable-content-daisyui.php', 'mutable-content-daisyui');
 
-        $this->callAfterResolving(LovRegistry::class, function (LovRegistry $lovRegistry) {
-            $lovRegistry->addItemIcons(DomainFieldType::CLASS_CODE, $this->fieldTypeIcons());
-        });
+        IconHelper::addLovItemIcons(DomainFieldType::CLASS_CODE, $this->fieldTypeIcons());
     }
 
     public function boot(): void
@@ -74,6 +74,8 @@ class MutableContentDaisyUiServiceProvider extends ServiceProvider
             __DIR__.'/../config/mutable-content-daisyui.php' => config_path('mutable-content-daisyui.php'),
         ], 'mutable-content-daisyui-config');
 
+        Livewire::component('mutable-content-daisyui.fields', ManageFields::class);
+        Livewire::component('mutable-content-daisyui.field-usage', ManageUsage::class);
         Livewire::component('mutable-content-daisyui.lovs', ManageLovs::class);
         Livewire::component('mutable-content-daisyui.lov-items', ManageItems::class);
     }

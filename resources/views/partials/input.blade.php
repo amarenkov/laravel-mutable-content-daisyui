@@ -23,14 +23,14 @@
             @break
 
         @case(Input::TYPE_SELECT)
-            @if ($input->isSearchable())
-                <x-mutable-content-daisyui::input type="search" size="sm" icon="heroicon-o-magnifying-glass" class="mb-1"
-                                                  wire:model.live.debounce.300ms="optionSearch.{{ $input->statePath }}"
-                                                  placeholder="{{ __('mutable-content-daisyui::ui.search') }}" :disabled="$disabled" />
-            @endif
-            <x-mutable-content-daisyui::select :model="$model" :live="$input->isLive()" :disabled="$disabled" :error="(bool)$error"
-                                               :options="$input->getOptions($data, $record, $optionSearch[$input->statePath] ?? null)"
-                                               :placeholder="$input->isPlaceholderSelectable() || blank(data_get($data, $input->statePath)) ? ($placeholder ?? __('mutable-content-daisyui::ui.select_placeholder')) : null" />
+            @php($options = $input->getOptions($data, $record, $optionSearch[$input->statePath] ?? null))
+            <x-mutable-content-daisyui::combobox :model="$model" :live="$input->isLive()" :disabled="$disabled" :error="(bool)$error"
+                                                 :options="$options"
+                                                 :icons="$input->hasOptionIcons() ? collect(array_keys($options))->mapWithKeys(fn ($value) => [$value => $input->getOptionIcon($value)])->all() : []"
+                                                 :placeholder="$placeholder"
+                                                 :placeholder-icon="$input->getPlaceholderIcon($data, $record)"
+                                                 :nullable="$input->isPlaceholderSelectable() || blank(data_get($data, $input->statePath))"
+                                                 :search-model="$input->isSearchable() ? 'optionSearch.'.$input->statePath : null" />
             @break
 
         @default

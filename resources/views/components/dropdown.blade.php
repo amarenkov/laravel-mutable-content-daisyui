@@ -6,7 +6,7 @@
     'width' => 'w-72',
 ])
 
-<details {{ $attributes->class(['dropdown dropdown-end']) }} x-data x-on:click.outside="$el.removeAttribute('open')">
+<details wire:ignore.self {{ $attributes->class(['dropdown dropdown-end']) }} x-data x-on:click.outside="$el.removeAttribute('open')">
     <summary @class(['btn btn-sm btn-ghost', 'btn-square' => $square]) @if ($square && $label) title="{{ $label }}" @endif>
         @if ($icon)
             {{ svg($icon, 'size-4') }}

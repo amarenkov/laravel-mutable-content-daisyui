@@ -2,6 +2,7 @@
 
 [![tests](https://github.com/amarenkov/laravel-mutable-content-daisyui/actions/workflows/tests.yml/badge.svg)](https://github.com/amarenkov/laravel-mutable-content-daisyui/actions/workflows/tests.yml)
 [![Packagist](https://img.shields.io/packagist/v/amarenkov/laravel-mutable-content-daisyui)](https://packagist.org/packages/amarenkov/laravel-mutable-content-daisyui)
+![coverage](https://img.shields.io/badge/coverage-80%25-green)
 
 Blade components on [daisyUI](https://daisyui.com) for
 [`amarenkov/laravel-mutable-content`](https://github.com/amarenkov/laravel-mutable-content).
@@ -9,7 +10,7 @@ Blade components on [daisyUI](https://daisyui.com) for
 Server-rendered screens for models with mutable fields: forms, detail views and tables built from
 field definitions, with a minimal amount of JavaScript.
 
-> Work in progress. Nothing is released yet: the screens for fields and their usage are coming.
+> Work in progress. Nothing is released yet.
 
 ## Stack
 
@@ -34,7 +35,7 @@ field definitions, with a minimal amount of JavaScript.
 
 - PHP 8.4
 - `amarenkov/laravel-mutable-content`
-- Livewire 4, Heroicons through `blade-ui-kit/blade-heroicons`
+- Livewire 4, [Lucide](https://lucide.dev) icons through `mallardduck/blade-lucide-icons`
 
 ## Installation
 
@@ -57,8 +58,10 @@ The package views are styled by the application build. Add daisyUI and the packa
 
 ## Management screens
 
-Screens for lists of values (LOVs) and their items. The application registers them inside its own
-route group, with its middleware and prefix but without a name prefix:
+Screens for fields, their usage in classes, lists of values (LOVs) and their items: an
+administrator adds new fields without a developer and without migrations. The application
+registers them inside its own route group, with its middleware and prefix but without a name
+prefix:
 
 ```php
 use Amarenkov\MutableContentDaisyUi\MutableContentDaisyUi;
@@ -68,7 +71,8 @@ Route::middleware('auth')->prefix('settings')->group(function () {
 });
 ```
 
-Route names are `MutableContentDaisyUi::ROUTE_LOVS` and `MutableContentDaisyUi::ROUTE_LOV_ITEMS`.
+Route names are the `MutableContentDaisyUi::ROUTE_*` constants: `ROUTE_FIELDS`,
+`ROUTE_FIELD_USAGE`, `ROUTE_LOVS` and `ROUTE_LOV_ITEMS`.
 The screens are full-page Livewire components rendered in the `layouts::app` layout, which gets
 the page title as `$title`. Another layout is set in the config
 (`php artisan vendor:publish --tag=mutable-content-daisyui-config`) or with
@@ -76,7 +80,9 @@ the page title as `$title`. Another layout is set in the config
 
 Every change made on the screens lands in the change log with the user and the page path.
 System records cannot be deleted, a LOV used in fields cannot be deleted or have its code
-changed, and items can be added as a list of labels.
+changed, and items can be added as a list of labels. Fields are filtered by type, LOV and object
+class and by quick filters (unbound, per class, per LOV); field type settings (display unit,
+link by code, unlisted codes, allow 0) are edited on the field and overridden on its usage.
 
 ## Building screens
 
@@ -107,11 +113,23 @@ column, filter or input is adjusted without rebuilding the list. A model refusin
 a deletion with a `DomainException`, or a unique constraint violation, is shown to the user as
 a notification and the form stays open.
 
+## Icons
+
+The package uses [Lucide](https://lucide.dev). An icon field stores a Lucide icon name, such as
+`flame`; values of other icon sets are not shown. Field type icons are defined in the package:
+an icon set for a field type item in the admin panel takes precedence when it is a Lucide name.
+Default icons for the items of other LOVs are added with
+`IconHelper::addLovItemIcons($lovCode, [$itemCode => 'icon-name'])`.
+
 ## Components
 
 Screens are built from the package Blade components, e.g. `<x-mutable-content-daisyui::button>`,
 `::modal`, `::field`, `::input`, `::select`, `::textarea`, `::toggle`, `::checkbox`,
-`::dropdown`, `::card`, `::table`, `::breadcrumbs`, `::notifications`. Notifications are sent
+`::combobox`, `::dropdown`, `::collapse`, `::badge`, `::card`, `::table`, `::breadcrumbs`, `::notifications`.
+
+`::combobox` replaces selects in forms and filters: a list with search (in the browser for short
+lists, on the server for long ones such as objects and icons), option icons, keyboard navigation
+and ARIA combobox roles. The list is a native popover, so it is not clipped by modals. Notifications are sent
 with the `mutable-content-notify` browser event (`type`, `title`, `body`).
 
 ## Translations

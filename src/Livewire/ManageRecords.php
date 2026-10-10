@@ -152,6 +152,13 @@ abstract class ManageRecords extends Component
         return null;
     }
 
+    /**
+     * Order of the records when no sortable column is chosen.
+     */
+    protected function applyDefaultOrder(Builder $query, string $direction): void
+    {
+    }
+
     protected function perPage(): int
     {
         return in_array($this->perPage, static::PER_PAGE_OPTIONS, true) ? $this->perPage : 50;
@@ -201,7 +208,7 @@ abstract class ManageRecords extends Component
             if ($systemMarkInCode && $field->code === Field::COMMON_CODE_CODE) {
                 $isSystemLabel = $fields[Field::COMMON_CODE_IS_SYSTEM]->label;
 
-                $column->format(fn ($state, ModelWithFields $record) => static::textWithMarks((string)$state, $record->isSystem() ? [['o-lock-closed', $isSystemLabel]] : []));
+                $column->format(fn ($state, ModelWithFields $record) => static::textWithMarks((string)$state, $record->isSystem() ? [['lock', $isSystemLabel]] : []));
             }
 
             if ($field->fieldType === DomainFieldType::TYPE_ICON) {
@@ -228,7 +235,7 @@ abstract class ManageRecords extends Component
 
         switch ($field->fieldType) {
             case DomainFieldType::TYPE_BOOL:
-                return $column->format(fn ($state) => $state ? static::icon('o-check-circle', 'size-5 text-success') : null);
+                return $column->format(fn ($state) => $state ? static::icon('circle-check', 'size-5 text-success') : null);
 
             case DomainFieldType::TYPE_INT:
             case DomainFieldType::TYPE_FLOAT:
@@ -316,7 +323,7 @@ abstract class ManageRecords extends Component
         if ($lovRegistry->hasLovItem($field->lovCode, $state)) {
             $label = (string)$lovRegistry->getLovItemLabel($field->lovCode, $state);
 
-            if ($icon = IconHelper::render($lovRegistry->getLovItemIcon($field->lovCode, $state))) {
+            if ($icon = IconHelper::render(IconHelper::lovItemIcon($field->lovCode, $state))) {
                 return new HtmlString('<span class="inline-flex items-center gap-1.5">'.$icon->toHtml().e($label).'</span>');
             }
 
@@ -327,7 +334,7 @@ abstract class ManageRecords extends Component
             return $lovRegistry->getLovItemLabel($field->lovCode, $state);
         }
 
-        return static::textWithMarks((string)$state, [['o-exclamation-triangle', __(static::UNLISTED_CODE_HINT), 'text-error']]);
+        return static::textWithMarks((string)$state, [['triangle-alert', __(static::UNLISTED_CODE_HINT), 'text-error']]);
     }
 
     protected function objectCodeTitle(Field $field, mixed $state, ?string $title): string|HtmlString|null
@@ -344,7 +351,7 @@ abstract class ManageRecords extends Component
             return (string)$state;
         }
 
-        return static::textWithMarks((string)$state, [['o-exclamation-triangle', __(static::UNLISTED_CODE_HINT), 'text-error']]);
+        return static::textWithMarks((string)$state, [['triangle-alert', __(static::UNLISTED_CODE_HINT), 'text-error']]);
     }
 
     // filters section
@@ -524,6 +531,7 @@ abstract class ManageRecords extends Component
             case DomainFieldType::TYPE_ICON:
                 return Input::make($field->code, Input::TYPE_SELECT)
                     ->searchable(fn (?string $search) => IconHelper::getOptions($search), fn ($value) => is_string($value) ? $value : null)
+                    ->optionIcon(fn ($value) => (string)$value)
                     ->rules([Rule::in(IconHelper::getValues())]);
 
             default:
@@ -536,6 +544,16 @@ abstract class ManageRecords extends Component
         $lovRegistry = app(LovRegistry::class);
 
         $input = Input::make($field->code, Input::TYPE_SELECT);
+
+        $itemCodes = array_keys($lovRegistry->getLovItemsOptions($field->lovCode) ?? []);
+
+        foreach ($itemCodes as $code) {
+            if (IconHelper::lovItemIcon($field->lovCode, $code) !== null) {
+                $input->optionIcon(fn ($value) => IconHelper::lovItemIcon($field->lovCode, $value));
+
+                break;
+            }
+        }
 
         if (!TypeSettings::allowsUnlistedCodes($field)) {
             return $input->options(fn () => $lovRegistry->getLovItemsOptions($field->lovCode) ?? []);
@@ -739,6 +757,14 @@ abstract class ManageRecords extends Component
     public function headerActions(): array
     {
         return [];
+    }
+
+    /**
+     * Extra view rendered above the table, e.g. quick filters.
+     */
+    public function topView(): ?string
+    {
+        return null;
     }
 
     /**
@@ -948,6 +974,8 @@ abstract class ManageRecords extends Component
 
         if ($sort !== null && ($column = $this->getColumns()[$sort] ?? null) && $column->isSortable()) {
             $column->applySort($query, $direction);
+        } else {
+            $this->applyDefaultOrder($query, $direction);
         }
 
         return $query->orderBy($query->getModel()->getQualifiedKeyName());

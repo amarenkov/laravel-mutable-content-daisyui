@@ -11,28 +11,32 @@
                 <x-mutable-content-daisyui::button size="sm" wire:click="{{ $method }}">{{ $label }}</x-mutable-content-daisyui::button>
             @endforeach
 
-            <x-mutable-content-daisyui::button variant="primary" size="sm" icon="heroicon-o-plus" wire:click="create">
+            <x-mutable-content-daisyui::button variant="primary" size="sm" icon="lucide-plus" wire:click="create">
                 {{ __('mutable-content-daisyui::ui.create') }}
             </x-mutable-content-daisyui::button>
         </div>
     </div>
 
+    @if ($topView = $this->topView())
+        @include($topView)
+    @endif
+
     <x-mutable-content-daisyui::card>
         <div class="flex flex-wrap items-center gap-2 border-b border-base-300 p-3">
             @if ($this->hasSearch())
                 <div class="w-full sm:w-64">
-                    <x-mutable-content-daisyui::input type="search" size="sm" icon="heroicon-o-magnifying-glass"
+                    <x-mutable-content-daisyui::input type="search" size="sm" icon="lucide-search"
                                                       wire:model.live.debounce.400ms="search" placeholder="{{ __('mutable-content-daisyui::ui.search') }}" />
                 </div>
             @endif
 
             <div class="ml-auto flex gap-2">
                 @if ($filters = $this->getFilters())
-                    <x-mutable-content-daisyui::dropdown :label="__('mutable-content-daisyui::ui.filters.title')" icon="heroicon-o-funnel" :badge="$this->activeFiltersCount() ?: null">
+                    <x-mutable-content-daisyui::dropdown :label="__('mutable-content-daisyui::ui.filters.title')" icon="lucide-funnel" :badge="$this->activeFiltersCount() ?: null">
                         @foreach ($filters as $name => $filter)
                             <x-mutable-content-daisyui::field :label="$filter->label" class="py-0">
-                                <x-mutable-content-daisyui::select size="sm" wire:model.live="filters.{{ $name }}"
-                                                                   :options="$filter->getOptions()" :placeholder="__('mutable-content-daisyui::ui.filters.all')" />
+                                <x-mutable-content-daisyui::combobox size="sm" model="filters.{{ $name }}" live
+                                                                     :options="$filter->getOptions()" :placeholder="__('mutable-content-daisyui::ui.filters.all')" />
                             </x-mutable-content-daisyui::field>
                         @endforeach
 
@@ -42,7 +46,7 @@
                     </x-mutable-content-daisyui::dropdown>
                 @endif
 
-                <x-mutable-content-daisyui::dropdown :label="__('mutable-content-daisyui::ui.columns')" icon="heroicon-o-view-columns" square width="w-64">
+                <x-mutable-content-daisyui::dropdown :label="__('mutable-content-daisyui::ui.columns')" icon="lucide-columns-3" square width="w-64">
                     @foreach ($this->getColumns() as $name => $column)
                         <x-mutable-content-daisyui::checkbox :label="$column->getLabel()" wire:click="toggleColumn('{{ $name }}')" :checked="$this->isColumnShown($name, $column)" />
                     @endforeach
@@ -61,9 +65,9 @@
                                 <button type="button" class="inline-flex items-center gap-1 hover:text-base-content" wire:click="sortBy('{{ $name }}')">
                                     {{ $column->getLabel() }}
                                     @if ($direction = $this->sortDirectionOf($name))
-                                        {{ svg($direction === 'asc' ? 'heroicon-m-chevron-up' : 'heroicon-m-chevron-down', 'size-4') }}
+                                        {{ svg($direction === 'asc' ? 'lucide-chevron-up' : 'lucide-chevron-down', 'size-4') }}
                                     @else
-                                        {{ svg('heroicon-m-chevron-up-down', 'size-4 opacity-30') }}
+                                        {{ svg('lucide-chevrons-up-down', 'size-4 opacity-30') }}
                                     @endif
                                 </button>
                             @else
@@ -90,12 +94,12 @@
                         <td>
                             <div class="flex justify-end gap-1">
                                 @if ($this->canDelete($record))
-                                    <x-mutable-content-daisyui::button variant="ghost-error" size="xs" square icon="heroicon-o-trash"
+                                    <x-mutable-content-daisyui::button variant="ghost-error" size="xs" square icon="lucide-trash-2"
                                                                        title="{{ __('mutable-content-daisyui::ui.delete') }}"
                                                                        wire:click="delete({{ json_encode($record->getKey()) }})"
                                                                        wire:confirm="{{ __('mutable-content-daisyui::ui.delete_confirm') }}" />
                                 @endif
-                                <x-mutable-content-daisyui::button variant="ghost" size="xs" square icon="heroicon-o-pencil-square"
+                                <x-mutable-content-daisyui::button variant="ghost" size="xs" square icon="lucide-square-pen"
                                                                    title="{{ __('mutable-content-daisyui::ui.edit') }}"
                                                                    wire:click="edit({{ json_encode($record->getKey()) }})" />
                             </div>

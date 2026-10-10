@@ -31,7 +31,7 @@ abstract class TestCase extends BaseTestCase
     {
         return [
             \BladeUI\Icons\BladeIconsServiceProvider::class,
-            \BladeUI\Heroicons\BladeHeroiconsServiceProvider::class,
+            \MallardDuck\LucideIcons\BladeLucideIconsServiceProvider::class,
             \Livewire\LivewireServiceProvider::class,
             MutableContentServiceProvider::class,
             MutableContentDaisyUiServiceProvider::class,

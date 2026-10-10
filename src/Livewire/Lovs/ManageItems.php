@@ -2,12 +2,15 @@
 
 namespace Amarenkov\MutableContentDaisyUi\Livewire\Lovs;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 use Amarenkov\MutableContent\Domain\Field\Field;
 use Amarenkov\MutableContent\Models\Lov\Item as LovItemModel;
 use Amarenkov\MutableContent\Models\Lov\Lov as LovModel;
+use Amarenkov\MutableContent\Models\ModelWithFields;
 
+use Amarenkov\MutableContentDaisyUi\Helpers\IconHelper;
 use Amarenkov\MutableContentDaisyUi\Livewire\ManageRecords;
 use Amarenkov\MutableContentDaisyUi\MutableContentDaisyUi;
 
@@ -30,6 +33,32 @@ class ManageItems extends ManageRecords
     protected function defaultSort(): ?string
     {
         return Field::COMMON_CODE_LABEL;
+    }
+
+    protected function columns(): array
+    {
+        $columns = parent::columns();
+
+        if (isset($columns[LovItemModel::CODE_ICON])) {
+            $columns[LovItemModel::CODE_ICON]->state(fn (ModelWithFields $record) => IconHelper::lovItemIcon($this->lovRecord->code(), $record->code()));
+        }
+
+        return $columns;
+    }
+
+    protected function inputs(): array
+    {
+        $inputs = parent::inputs();
+
+        if (isset($inputs[LovItemModel::CODE_ICON])) {
+            $default = fn (?Model $record) => $record instanceof ModelWithFields ? IconHelper::lovItemDefaultIcon($this->lovRecord->code(), $record->code()) : null;
+
+            $inputs[LovItemModel::CODE_ICON]
+                ->placeholder(fn (array $data, ?Model $record) => ($icon = $default($record)) !== null ? __('mutable-content-daisyui::ui.default_icon', ['icon' => $icon]) : null)
+                ->placeholderIcon(fn (array $data, ?Model $record) => $default($record));
+        }
+
+        return $inputs;
     }
 
     // public

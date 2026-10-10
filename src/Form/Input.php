@@ -31,6 +31,7 @@ class Input
 
     protected string|Closure|null $helper = null;
     protected string|Closure|null $placeholder = null;
+    protected string|Closure|null $placeholderIcon = null;
     protected ?string $suffix = null;
 
     /** @var array<string|int, string>|Closure|null */
@@ -38,6 +39,7 @@ class Input
 
     protected ?Closure $searchOptions = null;
     protected ?Closure $optionLabel = null;
+    protected ?Closure $optionIcon = null;
 
     protected bool $selectablePlaceholder = true;
 
@@ -113,6 +115,23 @@ class Input
         return $this->placeholder instanceof Closure ? ($this->placeholder)($data, $record) : $this->placeholder;
     }
 
+    /**
+     * Icon shown with the placeholder of a select, e.g. the default icon.
+     *
+     * @param string|Closure(array $data, ?Model $record): ?string|null $placeholderIcon icon name
+     */
+    public function placeholderIcon(string|Closure|null $placeholderIcon): static
+    {
+        $this->placeholderIcon = $placeholderIcon;
+
+        return $this;
+    }
+
+    public function getPlaceholderIcon(array $data, ?Model $record): ?string
+    {
+        return $this->placeholderIcon instanceof Closure ? ($this->placeholderIcon)($data, $record) : $this->placeholderIcon;
+    }
+
     public function selectablePlaceholder(bool $value = true): static
     {
         $this->selectablePlaceholder = $value;
@@ -164,6 +183,28 @@ class Input
     public function isSearchable(): bool
     {
         return $this->searchOptions !== null;
+    }
+
+    /**
+     * Icon of each option; the select then shows the options with icons.
+     *
+     * @param Closure(string|int $value): ?string $optionIcon icon name of the option
+     */
+    public function optionIcon(?Closure $optionIcon): static
+    {
+        $this->optionIcon = $optionIcon;
+
+        return $this;
+    }
+
+    public function hasOptionIcons(): bool
+    {
+        return $this->optionIcon !== null;
+    }
+
+    public function getOptionIcon(string|int $value): ?string
+    {
+        return $this->optionIcon ? ($this->optionIcon)($value) : null;
     }
 
     /**
