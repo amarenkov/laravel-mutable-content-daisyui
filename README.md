@@ -9,7 +9,7 @@ Blade components on [daisyUI](https://daisyui.com) for
 Server-rendered screens for models with mutable fields: forms, detail views and tables built from
 field definitions, with a minimal amount of JavaScript.
 
-> Work in progress. Nothing is released yet.
+> Work in progress. Nothing is released yet: the screens for fields and their usage are coming.
 
 ## Stack
 
@@ -34,12 +34,85 @@ field definitions, with a minimal amount of JavaScript.
 
 - PHP 8.4
 - `amarenkov/laravel-mutable-content`
+- Livewire 4, Heroicons through `blade-ui-kit/blade-heroicons`
 
 ## Installation
 
 ```bash
 composer require amarenkov/laravel-mutable-content-daisyui
+npm i -D daisyui@5
 ```
+
+The package views are styled by the application build. Add daisyUI and the package sources to
+`resources/css/app.css`:
+
+```css
+@import 'tailwindcss';
+
+@plugin 'daisyui';
+
+@source '../../vendor/amarenkov/laravel-mutable-content-daisyui/resources/views';
+@source '../../vendor/amarenkov/laravel-mutable-content-daisyui/src';
+```
+
+## Management screens
+
+Screens for lists of values (LOVs) and their items. The application registers them inside its own
+route group, with its middleware and prefix but without a name prefix:
+
+```php
+use Amarenkov\MutableContentDaisyUi\MutableContentDaisyUi;
+
+Route::middleware('auth')->prefix('settings')->group(function () {
+    MutableContentDaisyUi::routes();
+});
+```
+
+Route names are `MutableContentDaisyUi::ROUTE_LOVS` and `MutableContentDaisyUi::ROUTE_LOV_ITEMS`.
+The screens are full-page Livewire components rendered in the `layouts::app` layout, which gets
+the page title as `$title`. Another layout is set in the config
+(`php artisan vendor:publish --tag=mutable-content-daisyui-config`) or with
+`MUTABLE_CONTENT_DAISYUI_LAYOUT`.
+
+Every change made on the screens lands in the change log with the user and the page path.
+System records cannot be deleted, a LOV used in fields cannot be deleted or have its code
+changed, and items can be added as a list of labels.
+
+## Building screens
+
+Extend `Livewire\ManageRecords` and set the model: the table (search, sorting, filters,
+pagination, column toggles), the create and edit modal and deletion are built from the field
+definitions.
+
+```php
+use Amarenkov\MutableContentDaisyUi\Livewire\ManageRecords;
+
+class ManageProjects extends ManageRecords
+{
+    protected static string $model = Project::class;
+
+    protected function inputs(): array
+    {
+        $inputs = parent::inputs();
+
+        $inputs['status']->live();
+
+        return $inputs;
+    }
+}
+```
+
+`columns()`, `tableFilters()` and `inputs()` return arrays keyed by field code, so a single
+column, filter or input is adjusted without rebuilding the list. A model refusing a save or
+a deletion with a `DomainException`, or a unique constraint violation, is shown to the user as
+a notification and the form stays open.
+
+## Components
+
+Screens are built from the package Blade components, e.g. `<x-mutable-content-daisyui::button>`,
+`::modal`, `::field`, `::input`, `::select`, `::textarea`, `::toggle`, `::checkbox`,
+`::dropdown`, `::card`, `::table`, `::breadcrumbs`, `::notifications`. Notifications are sent
+with the `mutable-content-notify` browser event (`type`, `title`, `body`).
 
 ## Translations
 

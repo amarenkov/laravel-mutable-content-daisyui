@@ -1,0 +1,13 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Call to an undefined method Illuminate\\View\\View\:\:layout\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Livewire/ManageRecords.php
+
+		-
+			message: '#^Parameter \#1 \$view of function view expects view\-string\|null, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Livewire/ManageRecords.php
