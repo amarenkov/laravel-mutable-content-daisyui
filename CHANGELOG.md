@@ -7,6 +7,8 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-10
+
 ### Added
 
 - `MutableContentDaisyUi::navigation()` and the `navigation` component: menu items of the management screens under the "System settings" group.
@@ -14,6 +16,7 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Requires `amarenkov/laravel-mutable-content` ^0.7.
 - A field usage is bound to a class and optionally to one of its types (core 0.7 class types) instead of a class or a LOV: the type select lists the types of the chosen class, the LOV items are the `Item` class typed by LOV. Usage titles, the usage column and filter show the type, quick filters on the fields screen have a group per typed class.
 
 ### Fixed
@@ -49,6 +52,7 @@ Initial release.
 - Lucide icons: the interface, field type icons kept in the package (an icon set for the item in
   the admin panel takes precedence) and icon fields storing Lucide icon names.
 
-[Unreleased]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/amarenkov/laravel-mutable-content-daisyui/releases/tag/v0.1.0
