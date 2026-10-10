@@ -17,6 +17,19 @@ field definitions, with a minimal amount of JavaScript.
 - Tailwind CSS 4 and daisyUI 5
 - Livewire for server-driven interactivity, Alpine.js for small client-side behaviour
 
+## Design principles
+
+- **daisyUI is the only UI dependency.** It is a pure CSS plugin for Tailwind CSS: no runtime
+  JavaScript and no transitive dependencies. No other UI kits or JavaScript widget libraries.
+- **daisyUI markup lives in the package's own Blade components** (button, field, table, modal
+  and so on). Screens use these components, not daisyUI classes directly, so a daisyUI major
+  upgrade or a switch to another CSS kit touches one place.
+- **Native HTML first.** Modals use `<dialog>`, dropdowns use `popover` or `<details>`, dates use
+  `<input type="date">`, suggestions use `<datalist>`. Where native elements are not enough,
+  a small Alpine.js component (Alpine ships with Livewire) instead of a third-party widget.
+- **The host app pins daisyUI to one major version** (`"daisyui": "^5"`). Majors may rename
+  classes, so they are upgraded deliberately, together with this package.
+
 ## Requirements
 
 - PHP 8.4
