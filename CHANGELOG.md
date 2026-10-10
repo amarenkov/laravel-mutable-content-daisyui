@@ -7,6 +7,10 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-10
+
+Initial release.
+
 ### Added
 
 - `ManageRecords` Livewire page: a table with search, sorting, filters, pagination and column
@@ -21,4 +25,5 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Lucide icons: the interface, field type icons kept in the package (an icon set for the item in
   the admin panel takes precedence) and icon fields storing Lucide icon names.
 
-[Unreleased]: https://github.com/amarenkov/laravel-mutable-content-daisyui/commits/main
+[Unreleased]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/amarenkov/laravel-mutable-content-daisyui/releases/tag/v0.1.0

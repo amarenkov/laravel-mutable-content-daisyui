@@ -10,8 +10,6 @@ Blade components on [daisyUI](https://daisyui.com) for
 Server-rendered screens for models with mutable fields: forms, detail views and tables built from
 field definitions, with a minimal amount of JavaScript.
 
-> Work in progress. Nothing is released yet.
-
 ## Stack
 
 - Laravel 13 and Blade components
