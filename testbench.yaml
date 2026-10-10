@@ -1,0 +1,6 @@
+providers:
+  - BladeUI\Icons\BladeIconsServiceProvider
+  - MallardDuck\LucideIcons\BladeLucideIconsServiceProvider
+  - Livewire\LivewireServiceProvider
+  - Amarenkov\MutableContent\MutableContentServiceProvider
+  - Amarenkov\MutableContentDaisyUi\MutableContentDaisyUiServiceProvider
