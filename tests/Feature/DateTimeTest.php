@@ -20,7 +20,7 @@ class DateTimeTest extends TestCase
     {
         parent::defineEnvironment($app);
 
-        $app['config']->set('app.timezone', 'Europe/Moscow');
+        $app['config']->set('mutable-content.timezone', 'Europe/Moscow');
     }
 
     public function test_date_and_time_is_entered_and_shown_in_the_application_timezone(): void
