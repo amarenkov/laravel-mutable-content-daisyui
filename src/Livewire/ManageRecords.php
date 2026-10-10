@@ -27,6 +27,7 @@ use Amarenkov\MutableContent\Domain\Field\TypeSettings;
 use Amarenkov\MutableContent\Domain\LovRegistry;
 
 use Amarenkov\MutableContent\Helpers\DatabaseHelper;
+use Amarenkov\MutableContent\Helpers\NumberHelper;
 use Amarenkov\MutableContent\Helpers\ObjectHelper;
 use Amarenkov\MutableContent\Helpers\RuleHelper;
 
@@ -295,14 +296,18 @@ abstract class ManageRecords extends Component
                 ->prepare(function (Collection $records) use ($field, &$titles) {
                     $titles = ObjectHelper::getTitlesByCodes($field->objectClass, $records->pluck($field->code)->all());
                 })
-                ->format(fn ($state) => $this->objectCodeTitle($field, $state, $titles[(string)$state] ?? null));
+                ->format(function ($state) use ($field, &$titles) {
+                    return $this->objectCodeTitle($field, $state, $titles[(string)$state] ?? null);
+                });
         }
 
         return $column
             ->prepare(function (Collection $records) use ($field, &$titles) {
                 $titles = ObjectHelper::getTitles($field->objectClass, $records->pluck($field->code)->all());
             })
-            ->format(fn ($state) => $titles[ObjectHelper::toId($state)] ?? $state);
+            ->format(function ($state) use (&$titles) {
+                return $titles[ObjectHelper::toId($state)] ?? $state;
+            });
     }
 
     protected function sortableAndSearchable(Column $column, string $code): Column
@@ -805,7 +810,7 @@ abstract class ManageRecords extends Component
 
     protected static function formatNumber(int|float|string $value): string
     {
-        return rtrim(rtrim(number_format((float)$value, 6, ',', ' '), '0'), ',');
+        return NumberHelper::format((float)$value, 6);
     }
 
     protected static function formatDate(mixed $state): ?string

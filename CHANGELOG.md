@@ -7,6 +7,14 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Numbers are formatted with the separators of the current locale (core `NumberHelper`).
+
+### Fixed
+
+- Object reference columns showed the id instead of the object title.
+
 ## [0.1.0] - 2026-10-10
 
 Initial release.

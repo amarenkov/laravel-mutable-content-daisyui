@@ -2,13 +2,33 @@
 
 [![tests](https://github.com/amarenkov/laravel-mutable-content-daisyui/actions/workflows/tests.yml/badge.svg)](https://github.com/amarenkov/laravel-mutable-content-daisyui/actions/workflows/tests.yml)
 [![Packagist](https://img.shields.io/packagist/v/amarenkov/laravel-mutable-content-daisyui)](https://packagist.org/packages/amarenkov/laravel-mutable-content-daisyui)
-![coverage](https://img.shields.io/badge/coverage-80%25-green)
+![coverage](https://img.shields.io/badge/coverage-83%25-green)
 
 Blade components on [daisyUI](https://daisyui.com) for
 [`amarenkov/laravel-mutable-content`](https://github.com/amarenkov/laravel-mutable-content).
 
 Server-rendered screens for models with mutable fields: forms, detail views and tables built from
 field definitions, with a minimal amount of JavaScript.
+
+## Screenshots
+
+A demo bicycle catalog. The pages extend `ManageRecords` and only set the model.
+
+**Table** built from the field definitions: search, sorting, column toggles, LOV items with Lucide icons, object titles and values in display units.
+
+![Bicycles table](https://raw.githubusercontent.com/amarenkov/laravel-mutable-content-daisyui/main/art/bicycles.png)
+
+**Create and edit modal** with inputs chosen by field type.
+
+![Bicycle form](https://raw.githubusercontent.com/amarenkov/laravel-mutable-content-daisyui/main/art/edit.png)
+
+**Fields** with quick filters by class and LOV; the lock marks fields declared in code.
+
+![Fields screen](https://raw.githubusercontent.com/amarenkov/laravel-mutable-content-daisyui/main/art/fields.png)
+
+**Lists of values**: items with icons, added one by one or as a list of labels.
+
+![LOV items screen](https://raw.githubusercontent.com/amarenkov/laravel-mutable-content-daisyui/main/art/lov-items.png)
 
 ## Stack
 
