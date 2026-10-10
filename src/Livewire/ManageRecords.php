@@ -661,7 +661,7 @@ abstract class ManageRecords extends Component
             $inputRules = $fieldRules[$path] ?? ['nullable'];
 
             if ($input->isRequired() && !in_array('required', $inputRules, true)) {
-                $inputRules = array_values(array_diff($inputRules, ['nullable']));
+                $inputRules = array_values(array_filter($inputRules, fn ($rule) => $rule !== 'nullable'));
                 $inputRules[] = 'required';
             }
 
@@ -752,6 +752,14 @@ abstract class ManageRecords extends Component
     public function recordUrl(ModelWithFields $record): ?string
     {
         return null;
+    }
+
+    /**
+     * Title of the record for the user, e.g. in the delete confirmation.
+     */
+    public function recordTitle(ModelWithFields $record): string
+    {
+        return ObjectHelper::getTitle($record);
     }
 
     /**

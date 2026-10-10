@@ -7,6 +7,19 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `MutableContentDaisyUi::navigation()` and the `navigation` component: menu items of the management screens under the "System settings" group.
+- The delete confirmation names the record (`recordTitle()`, the scope for a field usage).
+
+### Changed
+
+- A field usage is bound to a class and optionally to one of its types (core 0.7 class types) instead of a class or a LOV: the type select lists the types of the chosen class, the LOV items are the `Item` class typed by LOV. Usage titles, the usage column and filter show the type, quick filters on the fields screen have a group per typed class.
+
+### Fixed
+
+- A required input with an object validation rule no longer fails when its rules are built.
+
 ## [0.2.0] - 2026-10-10
 
 ### Changed

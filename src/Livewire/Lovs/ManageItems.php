@@ -22,7 +22,7 @@ class ManageItems extends ManageRecords
     // protected
     protected function fieldScopes(): ?array
     {
-        return LovItemModel::getFieldScopesForLov($this->lovRecord->code());
+        return LovItemModel::getFieldScopesForType($this->lovRecord->code());
     }
 
     protected function parentRelation(): ?HasMany

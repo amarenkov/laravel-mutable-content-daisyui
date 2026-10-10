@@ -97,7 +97,7 @@
                                     <x-mutable-content-daisyui::button variant="ghost-error" size="xs" square icon="lucide-trash-2"
                                                                        title="{{ __('mutable-content-daisyui::ui.delete') }}"
                                                                        wire:click="delete({{ json_encode($record->getKey()) }})"
-                                                                       wire:confirm="{{ __('mutable-content-daisyui::ui.delete_confirm') }}" />
+                                                                       wire:confirm="{{ __('mutable-content-daisyui::ui.delete_confirm', ['title' => $this->recordTitle($record)]) }}" />
                                 @endif
                                 <x-mutable-content-daisyui::button variant="ghost" size="xs" square icon="lucide-square-pen"
                                                                    title="{{ __('mutable-content-daisyui::ui.edit') }}"

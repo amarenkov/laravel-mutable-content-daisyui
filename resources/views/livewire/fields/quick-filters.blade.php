@@ -2,11 +2,7 @@
     $tabs = $this->getTabs();
     $groups = collect($tabs)->groupBy('group', preserveKeys: true);
     $selected = $tab !== $this::TAB_ALL ? ($tabs[$tab]['label'] ?? null) : null;
-    $groupLabels = [
-        'common' => null,
-        'classes' => __('mutable-content-daisyui::ui.tabs.classes'),
-        'lovs' => __('mutable-content-daisyui::ui.lovs'),
-    ];
+    $groupLabels = $groups->map(fn ($items) => $items->first()['groupLabel'] ?? null)->all();
 @endphp
 
 <x-mutable-content-daisyui::collapse :title="__('mutable-content-daisyui::ui.tabs.quick_filters')"

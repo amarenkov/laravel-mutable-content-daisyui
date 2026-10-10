@@ -2,17 +2,13 @@
 
 namespace Amarenkov\MutableContentDaisyUi\Livewire\Fields;
 
-use Closure;
-
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Validation\Rule;
 
 use Amarenkov\MutableContent\Domain\Field\Field;
-use Amarenkov\MutableContent\Domain\LovRegistry;
 use Amarenkov\MutableContent\Domain\MutableClassRegistry;
-
-use Amarenkov\MutableContent\Helpers\FieldCodeHelper;
 
 use Amarenkov\MutableContent\Models\Field\Field as FieldModel;
 use Amarenkov\MutableContent\Models\Field\Usage as FieldUsageModel;
@@ -21,9 +17,11 @@ use Amarenkov\MutableContent\Models\ModelWithFields;
 use Amarenkov\MutableContent\Rules\FieldAllowedInClass;
 
 use Amarenkov\MutableContentDaisyUi\Form\FieldTypeSettingsInputs;
+use Amarenkov\MutableContentDaisyUi\Form\Input;
 use Amarenkov\MutableContentDaisyUi\Livewire\ManageRecords;
 use Amarenkov\MutableContentDaisyUi\MutableContentDaisyUi;
 use Amarenkov\MutableContentDaisyUi\Table\Column;
+use Amarenkov\MutableContentDaisyUi\Table\Filter;
 
 class ManageUsage extends ManageRecords
 {
@@ -47,13 +45,58 @@ class ManageUsage extends ManageRecords
 
     public static function getScopeTitle(string $scope): string
     {
-        [$type, $value] = FieldUsageModel::parseScope($scope);
+        $mutableClass = FieldUsageModel::getScopeMutableClass($scope);
 
-        return match ($type) {
-            FieldUsageModel::CODE_MUTABLE_CLASS => app(MutableClassRegistry::class)->getKeyValuePairs()[$value] ?? $value,
-            FieldUsageModel::CODE_LOV_CODE => __('LOV').': '.(app(LovRegistry::class)->getLovLabel($value) ?? $value),
-            default => $scope,
-        };
+        if ($mutableClass === null) {
+            return $scope;
+        }
+
+        $title = app(MutableClassRegistry::class)->getKeyValuePairs()[$mutableClass] ?? $mutableClass;
+        $typeCode = FieldUsageModel::getScopeTypeCode($scope);
+
+        if ($typeCode === null) {
+            return $title;
+        }
+
+        $typeLabel = is_subclass_of($mutableClass, ModelWithFields::class) ? ($mutableClass::getTypeOptions()[$typeCode] ?? $typeCode) : $typeCode;
+
+        return $title.': '.$typeLabel;
+    }
+
+    /**
+     * Scopes in display order with their titles: each class by label followed by its types.
+     *
+     * @return array<string, string>
+     */
+    public static function orderedScopes(): array
+    {
+        $mcds = app(MutableClassRegistry::class)->all();
+        usort($mcds, fn ($a, $b) => mb_strtolower($a->label) <=> mb_strtolower($b->label));
+
+        $result = [];
+
+        foreach ($mcds as $mcd) {
+            $mutableClass = $mcd->mutableClass;
+
+            $result[$mutableClass::getClassScope()] = $mcd->label;
+
+            $types = $mutableClass::getTypeOptions();
+            uasort($types, fn ($a, $b) => mb_strtolower($a) <=> mb_strtolower($b));
+
+            foreach ($types as $typeCode => $typeLabel) {
+                $result[$mutableClass::getTypeScope((string)$typeCode)] = $mcd->label.': '.$typeLabel;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected static function typeOptionsOf(mixed $mutableClass): array
+    {
+        return is_string($mutableClass) && is_subclass_of($mutableClass, ModelWithFields::class) ? $mutableClass::getTypeOptions() : [];
     }
 
     // protected
@@ -69,16 +112,7 @@ class ManageUsage extends ManageRecords
 
     protected function applyDefaultOrder(Builder $query, string $direction): void
     {
-        $mcds = app(MutableClassRegistry::class)->all();
-        usort($mcds, fn ($a, $b) => mb_strtolower($a->label) <=> mb_strtolower($b->label));
-
-        $lovLabels = app(LovRegistry::class)->getLovsOptions() ?? [];
-        uasort($lovLabels, fn ($a, $b) => mb_strtolower((string)$a) <=> mb_strtolower((string)$b));
-
-        $scopes = array_merge(
-            array_map(fn ($mcd) => $mcd->mutableClass::getClassScope(), $mcds),
-            array_map(fn ($lovCode) => FieldUsageModel::makeScope(FieldUsageModel::CODE_LOV_CODE, (string)$lovCode), array_keys($lovLabels))
-        );
+        $scopes = array_keys(static::orderedScopes());
 
         if (!$scopes) {
             return;
@@ -104,26 +138,18 @@ class ManageUsage extends ManageRecords
 
         $inputs[FieldUsageModel::CODE_MUTABLE_CLASS]
             ->live()
-            ->disabled(fn (array $data, ?Model $record) => filled($data[FieldUsageModel::CODE_LOV_CODE] ?? null) || $isSystem($record))
-            ->rules([
-                'required_without:data.'.FieldUsageModel::CODE_LOV_CODE,
-                'prohibits:data.'.FieldUsageModel::CODE_LOV_CODE,
-                new FieldAllowedInClass($fieldCode),
-            ]);
+            ->required()
+            ->disabled(fn (array $data, ?Model $record) => $isSystem($record))
+            ->rules([new FieldAllowedInClass($fieldCode)]);
 
-        $inputs[FieldUsageModel::CODE_LOV_CODE]
-            ->live()
-            ->disabled(fn (array $data, ?Model $record) => filled($data[FieldUsageModel::CODE_MUTABLE_CLASS] ?? null) || $isSystem($record))
-            ->helper(__('mutable-content-daisyui::ui.usage_lov_helper'))
-            ->rules([
-                'required_without:data.'.FieldUsageModel::CODE_MUTABLE_CLASS,
-                'prohibits:data.'.FieldUsageModel::CODE_MUTABLE_CLASS,
-                function (string $attribute, mixed $value, Closure $fail) use ($fieldCode) {
-                    if ($error = FieldCodeHelper::getErrorForClass($fieldCode, FieldUsageModel::LOV_MUTABLE_CLASS)) {
-                        $fail($error);
-                    }
-                },
-            ]);
+        $inputs[FieldUsageModel::CODE_TYPE_CODE]
+            ->type(Input::TYPE_SELECT)
+            ->options(fn (array $data) => static::typeOptionsOf($data[FieldUsageModel::CODE_MUTABLE_CLASS] ?? null))
+            ->placeholder(__('mutable-content-daisyui::ui.usage_all_types'))
+            ->helper(__('mutable-content-daisyui::ui.usage_type_helper'))
+            ->visible(fn (array $data) => static::typeOptionsOf($data[FieldUsageModel::CODE_MUTABLE_CLASS] ?? null) !== [])
+            ->disabled(fn (array $data, ?Model $record) => $isSystem($record))
+            ->rules(fn (array $data) => [Rule::in(array_map('strval', array_keys(static::typeOptionsOf($data[FieldUsageModel::CODE_MUTABLE_CLASS] ?? null))))]);
 
         return $inputs + FieldTypeSettingsInputs::make(
             fn () => $this->fieldRecord->{Field::CODE_FIELD_TYPE},
@@ -131,9 +157,20 @@ class ManageUsage extends ManageRecords
         );
     }
 
+    protected function payload(?Model $record): array
+    {
+        $payload = parent::payload($record);
+
+        if (!array_key_exists(FieldUsageModel::CODE_TYPE_CODE, $payload) && !($record instanceof ModelWithFields && $record->isSystem())) {
+            $payload[FieldUsageModel::CODE_TYPE_CODE] = null;
+        }
+
+        return $payload;
+    }
+
     protected function columns(): array
     {
-        $replacedCodes = [FieldUsageModel::CODE_MUTABLE_CLASS, FieldUsageModel::CODE_LOV_CODE, ...array_keys(static::usageMarks())];
+        $replacedCodes = [FieldUsageModel::CODE_MUTABLE_CLASS, FieldUsageModel::CODE_TYPE_CODE, ...array_keys(static::usageMarks())];
 
         $columns = [];
 
@@ -159,13 +196,7 @@ class ManageUsage extends ManageRecords
             ->label(__('mutable-content-daisyui::ui.usage'))
             ->state(fn (ModelWithFields $record) => (string)$record->{FieldUsageModel::CODE_SCOPE})
             ->format(function ($scope, ModelWithFields $record) use ($fields) {
-                [$type, $value] = FieldUsageModel::parseScope($scope);
-
-                $text = match ($type) {
-                    FieldUsageModel::CODE_MUTABLE_CLASS => $fields[$type]->label.': '.(app(MutableClassRegistry::class)->getKeyValuePairs()[$value] ?? $value),
-                    FieldUsageModel::CODE_LOV_CODE => $fields[$type]->label.': '.(app(LovRegistry::class)->getLovLabel($value) ?? $value),
-                    default => $scope,
-                };
+                $text = $fields[FieldUsageModel::CODE_MUTABLE_CLASS]->label.': '.static::getScopeTitle($scope);
 
                 $marks = [];
 
@@ -195,11 +226,14 @@ class ManageUsage extends ManageRecords
     {
         $fields = $this->fields();
 
-        $lovRegistry = app(LovRegistry::class);
-
         $filters = [
             FieldUsageModel::CODE_MUTABLE_CLASS => $this->fieldsSelectFilter(FieldUsageModel::CODE_MUTABLE_CLASS, (string)$fields[FieldUsageModel::CODE_MUTABLE_CLASS]->label, fn () => app(MutableClassRegistry::class)->getKeyValuePairs()),
-            FieldUsageModel::CODE_LOV_CODE => $this->fieldsSelectFilter(FieldUsageModel::CODE_LOV_CODE, (string)$fields[FieldUsageModel::CODE_LOV_CODE]->label, fn () => $lovRegistry->getLovsOptions() ?? []),
+            FieldUsageModel::CODE_TYPE_CODE => Filter::select(
+                FieldUsageModel::CODE_TYPE_CODE,
+                (string)$fields[FieldUsageModel::CODE_TYPE_CODE]->label,
+                fn () => array_filter(static::orderedScopes(), fn ($scope) => FieldUsageModel::getScopeTypeCode($scope) !== null, ARRAY_FILTER_USE_KEY),
+                fn (Builder $query, string $scope) => $query->where(FieldUsageModel::CODE_SCOPE, $scope),
+            ),
         ] + parent::tableFilters();
 
         foreach (array_keys(static::usageMarks()) as $code) {
@@ -214,6 +248,13 @@ class ManageUsage extends ManageRecords
     // public
     public FieldModel $fieldRecord;
 
+    public function updatedData(mixed $value, string $key): void
+    {
+        if ($key === FieldUsageModel::CODE_MUTABLE_CLASS) {
+            $this->data[FieldUsageModel::CODE_TYPE_CODE] = null;
+        }
+    }
+
     public function mount(string $field): void
     {
         $this->fieldRecord = FieldModel::query()->where('fields->'.Field::COMMON_CODE_CODE, $field)->firstOrFail();
@@ -222,6 +263,11 @@ class ManageUsage extends ManageRecords
     public function title(): string
     {
         return __('mutable-content-daisyui::ui.usage_title', ['field' => $this->fieldTitle()]);
+    }
+
+    public function recordTitle(ModelWithFields $record): string
+    {
+        return static::getScopeTitle((string)$record->{FieldUsageModel::CODE_SCOPE});
     }
 
     public function breadcrumbs(): array

@@ -20,7 +20,6 @@ use Amarenkov\MutableContent\Helpers\ObjectHelper;
 
 use Amarenkov\MutableContent\Models\Field\Field as FieldModel;
 use Amarenkov\MutableContent\Models\Field\Usage as FieldUsageModel;
-use Amarenkov\MutableContent\Models\Lov\Item as LovItemModel;
 use Amarenkov\MutableContent\Models\ModelWithFields;
 
 use Amarenkov\MutableContent\Rules\FieldCode as FieldCodeRule;
@@ -37,7 +36,7 @@ class ManageFields extends ManageRecords
     public const TAB_ALL = 'all';
     public const TAB_UNBOUND = 'unbound';
 
-    protected const LOV_TAB_PREFIX = 'lov-';
+    protected const TYPE_TAB_PREFIX = 'type-';
 
     // static
     protected static string $model = FieldModel::class;
@@ -49,15 +48,18 @@ class ManageFields extends ManageRecords
         });
     }
 
-    protected static function boundToLov(Builder $query, string $lovCode): Builder
+    /**
+     * @param class-string<ModelWithFields> $mutableClass
+     */
+    protected static function boundToType(Builder $query, string $mutableClass, string $typeCode): Builder
     {
-        return $query->whereHas('usages', function (Builder $query) use ($lovCode) {
-            $query->whereIn(FieldUsageModel::CODE_SCOPE, LovItemModel::getFieldScopesForLov($lovCode));
+        return $query->whereHas('usages', function (Builder $query) use ($mutableClass, $typeCode) {
+            $query->whereIn(FieldUsageModel::CODE_SCOPE, $mutableClass::getFieldScopesForType($typeCode));
         });
     }
 
     // protected
-    /** @var ?array<string, array{label: string, group: string, query: ?Closure}> */
+    /** @var ?array<string, array{label: string, group: string, groupLabel: ?string, query: ?Closure}> */
     protected ?array $tabsCache = null;
 
     protected function baseQuery(): Builder
@@ -182,9 +184,9 @@ class ManageFields extends ManageRecords
     public string $tab = self::TAB_ALL;
 
     /**
-     * Quick filters: all, unbound, fields of each mutable class and of the items of each LOV.
+     * Quick filters: all, unbound, fields of each mutable class and of each type of a class.
      *
-     * @return array<string, array{label: string, group: string, query: ?Closure}>
+     * @return array<string, array{label: string, group: string, groupLabel: ?string, query: ?Closure}>
      */
     public function getTabs(): array
     {
@@ -193,8 +195,8 @@ class ManageFields extends ManageRecords
         }
 
         $tabs = [
-            self::TAB_ALL => ['label' => __('mutable-content-daisyui::ui.tabs.all'), 'group' => 'common', 'query' => null],
-            self::TAB_UNBOUND => ['label' => __('mutable-content-daisyui::ui.tabs.unbound'), 'group' => 'common', 'query' => fn (Builder $query) => $query->whereDoesntHave('usages')],
+            self::TAB_ALL => ['label' => __('mutable-content-daisyui::ui.tabs.all'), 'group' => 'common', 'groupLabel' => null, 'query' => null],
+            self::TAB_UNBOUND => ['label' => __('mutable-content-daisyui::ui.tabs.unbound'), 'group' => 'common', 'groupLabel' => null, 'query' => fn (Builder $query) => $query->whereDoesntHave('usages')],
         ];
 
         $mcds = app(MutableClassRegistry::class)->all();
@@ -206,21 +208,27 @@ class ManageFields extends ManageRecords
             $tabs[Str::slug(str_replace('\\', '-', $mutableClass))] = [
                 'label' => $mcd->label,
                 'group' => 'classes',
+                'groupLabel' => __('mutable-content-daisyui::ui.tabs.classes'),
                 'query' => fn (Builder $query) => static::boundTo($query, $mutableClass),
             ];
         }
 
-        $lovs = app(LovRegistry::class)->getLovsOptions() ?? [];
-        uasort($lovs, fn ($a, $b) => mb_strtolower((string)$a) <=> mb_strtolower((string)$b));
+        foreach ($mcds as $mcd) {
+            $mutableClass = $mcd->mutableClass;
 
-        foreach ($lovs as $lovCode => $lovLabel) {
-            $lovCode = (string)$lovCode;
+            $types = $mutableClass::getTypeOptions();
+            uasort($types, fn ($a, $b) => mb_strtolower((string)$a) <=> mb_strtolower((string)$b));
 
-            $tabs[self::LOV_TAB_PREFIX.Str::slug($lovCode)] = [
-                'label' => (string)$lovLabel,
-                'group' => 'lovs',
-                'query' => fn (Builder $query) => static::boundToLov($query, $lovCode),
-            ];
+            foreach ($types as $typeCode => $typeLabel) {
+                $typeCode = (string)$typeCode;
+
+                $tabs[self::TYPE_TAB_PREFIX.Str::slug(str_replace('\\', '-', $mutableClass)).'-'.Str::slug($typeCode)] = [
+                    'label' => (string)$typeLabel,
+                    'group' => 'type:'.$mutableClass,
+                    'groupLabel' => $mcd->label,
+                    'query' => fn (Builder $query) => static::boundToType($query, $mutableClass, $typeCode),
+                ];
+            }
         }
 
         return $this->tabsCache = $tabs;

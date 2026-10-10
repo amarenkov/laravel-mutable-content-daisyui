@@ -1,10 +1,12 @@
 <?php
 
 return [
+    'navigation_group' => 'Системные настройки',
     'fields' => 'Поля',
     'usage' => 'Использование',
     'usage_title' => 'Использование поля :field',
-    'usage_lov_helper' => 'Поле будет у элементов этого справочника.',
+    'usage_all_types' => 'Все объекты класса',
+    'usage_type_helper' => 'Поле будет только у объектов этого типа; без типа — у всех объектов класса.',
     'type' => 'Тип',
     'yes_lower' => 'да',
     'no_lower' => 'нет',
@@ -19,7 +21,7 @@ return [
     'create' => 'Создать',
     'edit' => 'Изменить',
     'delete' => 'Удалить',
-    'delete_confirm' => 'Удалить запись?',
+    'delete_confirm' => 'Удалить «:title»?',
     'delete_denied' => 'Удалить нельзя',
     'deleted' => 'Удалено',
     'saved' => 'Сохранено',

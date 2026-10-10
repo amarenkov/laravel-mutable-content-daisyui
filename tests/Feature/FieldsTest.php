@@ -136,14 +136,14 @@ class FieldsTest extends TestCase
         $this->assertSame(ManageFields::TAB_ALL, $component->get('tab'));
     }
 
-    public function test_usage_needs_a_class_or_a_lov(): void
+    public function test_usage_needs_a_class(): void
     {
         $this->createField('note', Type::TYPE_STRING);
 
         Livewire::test(ManageUsage::class, ['field' => 'note'])
             ->call('create')
             ->call('save')
-            ->assertHasErrors(['data.'.Usage::CODE_MUTABLE_CLASS, 'data.'.Usage::CODE_LOV_CODE]);
+            ->assertHasErrors(['data.'.Usage::CODE_MUTABLE_CLASS]);
     }
 
     public function test_usage_settings_inherit_the_field_ones(): void
@@ -192,5 +192,66 @@ class FieldsTest extends TestCase
         $item->save();
 
         $this->assertSame('hash', IconHelper::lovItemIcon(Type::CLASS_CODE, Type::TYPE_INT));
+    }
+
+    public function test_usage_is_bound_to_a_type_of_a_class(): void
+    {
+        $lov = new Lov();
+        $lov->fill(['code' => 'vehicle', 'label' => 'Vehicle']);
+        $lov->save();
+
+        $this->createField('capacity', Type::TYPE_INT);
+
+        $component = Livewire::test(ManageUsage::class, ['field' => 'capacity'])->call('create');
+
+        $isTypeVisible = fn () => $component->instance()->getInputs()[Usage::CODE_TYPE_CODE]->isVisible($component->get('data'), null);
+
+        $this->assertFalse($isTypeVisible());
+
+        $component->set('data.'.Usage::CODE_MUTABLE_CLASS, Item::class);
+
+        $this->assertTrue($isTypeVisible());
+        $this->assertArrayHasKey('vehicle', $component->instance()->getInputs()[Usage::CODE_TYPE_CODE]->getOptions($component->get('data'), null));
+
+        $component
+            ->set('data.'.Usage::CODE_TYPE_CODE, 'vehicle')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertSame([Item::getTypeScope('vehicle')], Field::where('fields->code', 'capacity')->first()->usages()->pluck('scope')->all());
+        $this->assertTrue($lov->fresh()->isUsedInFields());
+    }
+
+    public function test_type_is_reset_when_the_class_changes(): void
+    {
+        $this->createField('capacity', Type::TYPE_INT);
+
+        Livewire::test(ManageUsage::class, ['field' => 'capacity'])
+            ->call('create')
+            ->set('data.'.Usage::CODE_MUTABLE_CLASS, Item::class)
+            ->set('data.'.Usage::CODE_TYPE_CODE, Type::CLASS_CODE)
+            ->set('data.'.Usage::CODE_MUTABLE_CLASS, Lov::class)
+            ->assertSet('data.'.Usage::CODE_TYPE_CODE, null);
+    }
+
+    public function test_unknown_type_is_rejected(): void
+    {
+        $this->createField('capacity', Type::TYPE_INT);
+
+        Livewire::test(ManageUsage::class, ['field' => 'capacity'])
+            ->call('create')
+            ->set('data.'.Usage::CODE_MUTABLE_CLASS, Item::class)
+            ->set('data.'.Usage::CODE_TYPE_CODE, 'no_such_lov')
+            ->call('save')
+            ->assertHasErrors(['data.'.Usage::CODE_TYPE_CODE]);
+    }
+
+    public function test_quick_filters_have_types_of_typed_classes(): void
+    {
+        $tabs = Livewire::test(ManageFields::class)->instance()->getTabs();
+
+        $typeTabs = array_filter($tabs, fn ($tab) => $tab['group'] === 'type:'.Item::class);
+
+        $this->assertContains('Field type', array_column($typeTabs, 'label'));
     }
 }

@@ -1,10 +1,12 @@
 <?php
 
 return [
+    'navigation_group' => 'System settings',
     'fields' => 'Fields',
     'usage' => 'Usage',
     'usage_title' => 'Usage of the :field field',
-    'usage_lov_helper' => 'The field will belong to the items of this LOV.',
+    'usage_all_types' => 'All objects of the class',
+    'usage_type_helper' => 'The field belongs only to the objects of this type; without a type, to all objects of the class.',
     'type' => 'Type',
     'yes_lower' => 'yes',
     'no_lower' => 'no',
@@ -19,7 +21,7 @@ return [
     'create' => 'Create',
     'edit' => 'Edit',
     'delete' => 'Delete',
-    'delete_confirm' => 'Delete the record?',
+    'delete_confirm' => 'Delete ":title"?',
     'delete_denied' => 'Cannot be deleted',
     'deleted' => 'Deleted',
     'saved' => 'Saved',
