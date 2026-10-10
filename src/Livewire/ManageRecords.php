@@ -57,6 +57,10 @@ abstract class ManageRecords extends Component
     // const
     public const DATE_DISPLAY_FORMAT = 'd.m.Y';
 
+    public const DATETIME_DISPLAY_FORMAT = 'd.m.Y H:i';
+
+    protected const DATETIME_INPUT_FORMAT = 'Y-m-d\\TH:i';
+
     public const PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
     protected const UNLISTED_CODE_HINT = 'mutable-content-daisyui::ui.unlisted_code';
@@ -274,6 +278,9 @@ abstract class ManageRecords extends Component
 
             case DomainFieldType::TYPE_DATE:
                 return $column->format(fn ($state) => static::formatDate($state));
+
+            case DomainFieldType::TYPE_DATETIME:
+                return $column->format(fn ($state, ModelWithFields $record) => $record->getDateTime($field->code)?->format(static::DATETIME_DISPLAY_FORMAT));
 
             case DomainFieldType::TYPE_ICON:
                 return $column->format(fn ($state, ModelWithFields $record) => IconHelper::render($state, 'size-5', ObjectHelper::getTitle($record)));
@@ -532,6 +539,11 @@ abstract class ManageRecords extends Component
 
             case DomainFieldType::TYPE_DATE:
                 return Input::make($field->code, Input::TYPE_DATE);
+
+            case DomainFieldType::TYPE_DATETIME:
+                return Input::make($field->code, Input::TYPE_DATETIME)
+                    ->formatState(fn (?Model $record) => $record instanceof ModelWithFields ? $record->getDateTime($field->code)?->format(static::DATETIME_INPUT_FORMAT) : null)
+                    ->dehydrateState(fn ($state) => ModelWithFields::toDateTimeValue($state));
 
             case DomainFieldType::TYPE_ICON:
                 return Input::make($field->code, Input::TYPE_SELECT)

@@ -28,7 +28,7 @@
     },
     "require": {
         "php": "^8.4",
-        "amarenkov/laravel-mutable-content": "^0.7",
+        "amarenkov/laravel-mutable-content": "^0.7.2",
         "livewire/livewire": "^4.0",
         "mallardduck/blade-lucide-icons": "^2.0"
     },

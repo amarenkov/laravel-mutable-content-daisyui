@@ -35,7 +35,7 @@
 
         @default
             <x-mutable-content-daisyui::input :model="$model" :live="$input->isLive()" :disabled="$disabled" :error="(bool)$error"
-                                              :type="match ($input->type) { Input::TYPE_NUMBER, Input::TYPE_INTEGER => 'number', Input::TYPE_DATE => 'date', default => 'text' }"
+                                              :type="match ($input->type) { Input::TYPE_NUMBER, Input::TYPE_INTEGER => 'number', Input::TYPE_DATE => 'date', Input::TYPE_DATETIME => 'datetime-local', default => 'text' }"
                                               :step="match ($input->type) { Input::TYPE_NUMBER => 'any', Input::TYPE_INTEGER => '1', default => null }"
                                               :maxlength="$input->getMaxLength()"
                                               :placeholder="$placeholder"

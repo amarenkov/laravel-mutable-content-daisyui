@@ -7,6 +7,14 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `datetime` fields: a date and time input in the application timezone, shown as `d.m.Y H:i`; a field type icon.
+
+### Changed
+
+- Requires `amarenkov/laravel-mutable-content` ^0.7.2.
+
 ## [0.3.0] - 2026-10-10
 
 ### Added

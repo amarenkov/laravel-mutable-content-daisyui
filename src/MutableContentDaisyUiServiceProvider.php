@@ -41,6 +41,7 @@ class MutableContentDaisyUiServiceProvider extends ServiceProvider
             DomainFieldType::TYPE_AREA => 'square-dashed',
             DomainFieldType::TYPE_VOLUME => 'box',
             DomainFieldType::TYPE_DATE => 'calendar',
+            DomainFieldType::TYPE_DATETIME => 'calendar-clock',
             DomainFieldType::TYPE_ICON => 'image',
             DomainFieldType::TYPE_SYSTEM => 'settings',
         ];

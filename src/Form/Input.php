@@ -19,6 +19,7 @@ class Input
     public const TYPE_SELECT = 'select';
     public const TYPE_TOGGLE = 'toggle';
     public const TYPE_DATE = 'date';
+    public const TYPE_DATETIME = 'datetime';
 
     // static
     public static function make(string $statePath, string $type = self::TYPE_TEXT): static
