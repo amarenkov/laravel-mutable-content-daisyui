@@ -7,8 +7,11 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-10
+
 ### Changed
 
+- Requires `amarenkov/laravel-mutable-content` ^0.6.
 - Numbers are formatted with the separators of the current locale (core `NumberHelper`).
 
 ### Fixed
@@ -33,5 +36,6 @@ Initial release.
 - Lucide icons: the interface, field type icons kept in the package (an icon set for the item in
   the admin panel takes precedence) and icon fields storing Lucide icon names.
 
-[Unreleased]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/amarenkov/laravel-mutable-content-daisyui/releases/tag/v0.1.0

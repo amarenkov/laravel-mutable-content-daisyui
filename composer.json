@@ -28,7 +28,7 @@
     },
     "require": {
         "php": "^8.4",
-        "amarenkov/laravel-mutable-content": "^0.5",
+        "amarenkov/laravel-mutable-content": "^0.6",
         "livewire/livewire": "^4.0",
         "mallardduck/blade-lucide-icons": "^2.0"
     },
@@ -49,7 +49,7 @@
             ]
         },
         "branch-alias": {
-            "dev-main": "0.1.x-dev"
+            "dev-main": "0.2.x-dev"
         }
     },
     "require-dev": {
