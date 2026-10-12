@@ -7,6 +7,12 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `segmented` component: a group of buttons choosing one value, a radio group bound to a Livewire property.
+- `status` component: a status dot with a variant and pulsing.
+- `card` component: `title`, an `actions` slot and `body` for a padded card with a header row.
+
 ## [0.3.1] - 2026-10-10
 
 ### Added

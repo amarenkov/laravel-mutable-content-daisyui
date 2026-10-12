@@ -143,12 +143,17 @@ Default icons for the items of other LOVs are added with
 
 Screens are built from the package Blade components, e.g. `<x-mutable-content-daisyui::button>`,
 `::modal`, `::field`, `::input`, `::select`, `::textarea`, `::toggle`, `::checkbox`,
-`::combobox`, `::dropdown`, `::collapse`, `::badge`, `::card`, `::table`, `::breadcrumbs`, `::notifications`.
+`::combobox`, `::segmented`, `::dropdown`, `::collapse`, `::badge`, `::status`, `::card`, `::table`, `::breadcrumbs`,
+`::notifications`.
 
 `::combobox` replaces selects in forms and filters: a list with search (in the browser for short
 lists, on the server for long ones such as objects and icons), option icons, keyboard navigation
 and ARIA combobox roles. The list is a native popover, so it is not clipped by modals. Notifications are sent
 with the `mutable-content-notify` browser event (`type`, `title`, `body`).
+
+`::segmented` is a group of buttons for one value (a radio group bound with `model`, live by default).
+`::status` is a small status dot (`variant`, `pulse`). `::card` wraps a table as is; with `title`,
+an `actions` slot or `body` it gets padding, the title and the actions in a row.
 
 ## Translations
 
