@@ -7,6 +7,15 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Money fields: an amount input with a currency select (the items of the `currency` LOV; the only currency is preselected), a fixed currency (`currency` setting) is the amount suffix; the column shows the amount with the currency symbol. An empty amount is no value: `Input::validationState()` gives the validation another value than the form one, `ManageRecords::prepareForValidation()` applies it. Icon `banknote`.
+- Field type settings: «Allow negative values» and «Allow 0» for number and measurement types, with the default of the type (on for numbers and money, off for measurements); «Currency» for money. `describe()` shows them.
+
+### Changed
+
+- Requires `amarenkov/laravel-mutable-content` ^0.7.5.
+
 ## [0.3.2] - 2026-10-12
 
 ### Added

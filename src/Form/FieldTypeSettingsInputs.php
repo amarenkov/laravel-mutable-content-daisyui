@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Model;
 use Amarenkov\MutableContent\Domain\Field\Field;
 use Amarenkov\MutableContent\Domain\Field\Lov\Type as FieldType;
 use Amarenkov\MutableContent\Domain\Field\TypeSettings;
+use Amarenkov\MutableContent\Domain\LovRegistry;
+
+use Amarenkov\MutableContent\Models\Lov\Currency;
 
 use Amarenkov\MutableContent\Models\ModelWithFields;
 
@@ -22,6 +25,8 @@ class FieldTypeSettingsInputs
     public const DISPLAY_UNIT_STATE_PATH = Field::CODE_FIELD_TYPE_SETTINGS.'.'.TypeSettings::DISPLAY_UNIT;
     public const ALLOW_UNLISTED_CODES_STATE_PATH = Field::CODE_FIELD_TYPE_SETTINGS.'.'.TypeSettings::ALLOW_UNLISTED_CODES;
     public const ALLOW_ZERO_STATE_PATH = Field::CODE_FIELD_TYPE_SETTINGS.'.'.TypeSettings::ALLOW_ZERO;
+    public const ALLOW_NEGATIVE_STATE_PATH = Field::CODE_FIELD_TYPE_SETTINGS.'.'.TypeSettings::ALLOW_NEGATIVE;
+    public const CURRENCY_STATE_PATH = Field::CODE_FIELD_TYPE_SETTINGS.'.'.TypeSettings::CURRENCY;
     public const LINK_BY_CODE_STATE_PATH = Field::CODE_FIELD_TYPE_SETTINGS.'.'.TypeSettings::LINK_BY_CODE;
 
     protected const FLAG_TRUE = '1';
@@ -39,7 +44,13 @@ class FieldTypeSettingsInputs
         return static::displayUnitInputs($fieldType, $inherited)
             + static::linkByCodeInputs($fieldType, $inherited)
             + static::allowUnlistedCodesInputs($fieldType, $inherited)
-            + static::allowZeroInputs($fieldType, $inherited);
+            + static::currencyInputs($fieldType, $inherited)
+            + static::signInputs($fieldType, $inherited);
+    }
+
+    protected static function hasSignSettings(?string $fieldType): bool
+    {
+        return in_array((string)$fieldType, TypeSettings::ALLOW_ZERO_TYPES, true) || in_array((string)$fieldType, TypeSettings::SIGNED_TYPES, true);
     }
 
     protected static function recordSetting(?Model $record, string $setting): mixed
@@ -53,15 +64,20 @@ class FieldTypeSettingsInputs
         return is_array($settings) || $settings instanceof ArrayAccess ? ($settings[$setting] ?? null) : null;
     }
 
-    protected static function flagInput(string $setting, string $statePath, string $label, string|Closure $helper, Closure $visible, ?Closure $inherited): Input
+    /**
+     * @param ?Closure(array $data, ?Model $record): bool $default value of the setting that is not set; false if none
+     */
+    protected static function flagInput(string $setting, string $statePath, string $label, string|Closure $helper, Closure $visible, ?Closure $inherited, ?Closure $default = null): Input
     {
+        $default ??= fn () => false;
+
         if ($inherited) {
             return Input::make($statePath, Input::TYPE_SELECT)
                 ->label($label)
                 ->helper($helper)
                 ->options([self::FLAG_TRUE => __('mutable-content-daisyui::ui.yes'), self::FLAG_FALSE => __('mutable-content-daisyui::ui.no')])
-                ->placeholder(fn () => __('mutable-content-daisyui::ui.settings.inherited', [
-                    'value' => ($inherited()[$setting] ?? null) === true ? __('mutable-content-daisyui::ui.yes_lower') : __('mutable-content-daisyui::ui.no_lower'),
+                ->placeholder(fn (array $data, ?Model $record) => __('mutable-content-daisyui::ui.settings.inherited', [
+                    'value' => ($inherited()[$setting] ?? $default($data, $record)) === true ? __('mutable-content-daisyui::ui.yes_lower') : __('mutable-content-daisyui::ui.no_lower'),
                 ]))
                 ->formatState(fn (?Model $record) => match (static::recordSetting($record, $setting)) {
                     true => self::FLAG_TRUE,
@@ -79,24 +95,65 @@ class FieldTypeSettingsInputs
         return Input::make($statePath, Input::TYPE_TOGGLE)
             ->label($label)
             ->helper($helper)
-            ->formatState(fn (?Model $record) => static::recordSetting($record, $setting) === true)
-            ->dehydrateState(fn ($state) => $state ? true : null)
+            ->formatState(fn (?Model $record) => (static::recordSetting($record, $setting) ?? $default([], $record)) === true)
+            ->dehydrateState(fn ($state, array $data) => (bool)$state === $default($data, null) ? null : (bool)$state)
             ->visible($visible);
     }
 
     /**
+     * Allow negative values and allow zero: number and measurement types, the default depends on the type.
+     *
      * @return array<string, Input>
      */
-    protected static function allowZeroInputs(Closure $fieldType, ?Closure $inherited): array
+    protected static function signInputs(Closure $fieldType, ?Closure $inherited): array
     {
-        $input = static::flagInput(
+        $visible = fn (array $data, ?Model $record) => static::hasSignSettings($fieldType($data, $record));
+
+        $default = fn (string $setting) => fn (array $data, ?Model $record) => TypeSettings::getDefaultValue((string)$fieldType($data, $record), $setting) === true;
+
+        $negative = static::flagInput(
+            TypeSettings::ALLOW_NEGATIVE,
+            self::ALLOW_NEGATIVE_STATE_PATH,
+            __('mutable-content-daisyui::ui.settings.allow_negative'),
+            __('mutable-content-daisyui::ui.settings.allow_negative_helper'),
+            $visible,
+            $inherited,
+            $default(TypeSettings::ALLOW_NEGATIVE),
+        );
+
+        $zero = static::flagInput(
             TypeSettings::ALLOW_ZERO,
             self::ALLOW_ZERO_STATE_PATH,
             __('mutable-content-daisyui::ui.settings.allow_zero'),
             __('mutable-content-daisyui::ui.settings.allow_zero_helper'),
-            fn (array $data, ?Model $record) => in_array((string)$fieldType($data, $record), TypeSettings::ALLOW_ZERO_TYPES, true),
+            $visible,
             $inherited,
+            $default(TypeSettings::ALLOW_ZERO),
         );
+
+        return [$negative->statePath => $negative, $zero->statePath => $zero];
+    }
+
+    /**
+     * The only currency of a money field.
+     *
+     * @return array<string, Input>
+     */
+    protected static function currencyInputs(Closure $fieldType, ?Closure $inherited): array
+    {
+        $input = Input::make(self::CURRENCY_STATE_PATH, Input::TYPE_SELECT)
+            ->label(__('mutable-content-daisyui::ui.settings.currency'))
+            ->helper(__('mutable-content-daisyui::ui.settings.currency_helper'))
+            ->options(fn () => array_map('strval', app(LovRegistry::class)->getLovItemsOptions(Currency::CODE)))
+            ->placeholder(function () use ($inherited) {
+                $currency = $inherited ? ($inherited()[TypeSettings::CURRENCY] ?? null) : null;
+
+                return $currency === null
+                    ? __('mutable-content-daisyui::ui.settings.any_currency')
+                    : __('mutable-content-daisyui::ui.settings.inherited', ['value' => app(LovRegistry::class)->getLovItemLabel(Currency::CODE, $currency) ?? $currency]);
+            })
+            ->formatState(fn (?Model $record) => static::recordSetting($record, TypeSettings::CURRENCY))
+            ->visible(fn (array $data, ?Model $record) => (string)$fieldType($data, $record) === FieldType::TYPE_MONEY);
 
         return [$input->statePath => $input];
     }
@@ -246,7 +303,19 @@ class FieldTypeSettingsInputs
             }
         }
 
-        if (in_array($fieldType, TypeSettings::ALLOW_ZERO_TYPES, true)) {
+        if ($fieldType === FieldType::TYPE_MONEY && is_string($settings[TypeSettings::CURRENCY] ?? null)) {
+            $result[] = __('mutable-content-daisyui::ui.settings.describe.currency', ['currency' => $settings[TypeSettings::CURRENCY]]);
+        }
+
+        if (static::hasSignSettings($fieldType)) {
+            $allowNegative = $settings[TypeSettings::ALLOW_NEGATIVE] ?? null;
+
+            if ($allowNegative === true) {
+                $result[] = __('mutable-content-daisyui::ui.settings.describe.allow_negative');
+            } elseif ($allowNegative === false) {
+                $result[] = __('mutable-content-daisyui::ui.settings.describe.no_negative');
+            }
+
             $allowZero = $settings[TypeSettings::ALLOW_ZERO] ?? null;
 
             if ($allowZero === true) {

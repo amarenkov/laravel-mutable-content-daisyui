@@ -32,9 +32,11 @@ use Amarenkov\MutableContent\Helpers\ObjectHelper;
 use Amarenkov\MutableContent\Helpers\RuleHelper;
 
 use Amarenkov\MutableContent\Models\ModelWithFields;
+use Amarenkov\MutableContent\Models\Lov\Currency;
 
 use Amarenkov\MutableContent\ValueObjects\Density;
 use Amarenkov\MutableContent\ValueObjects\FieldValue;
+use Amarenkov\MutableContent\ValueObjects\Money;
 use Amarenkov\MutableContent\ValueObjects\SurfaceDensity;
 
 use Amarenkov\MutableContentDaisyUi\Exceptions\SaveFailed;
@@ -281,6 +283,9 @@ abstract class ManageRecords extends Component
 
             case DomainFieldType::TYPE_DATETIME:
                 return $column->format(fn ($state, ModelWithFields $record) => $record->getDateTime($field->code)?->format(static::DATETIME_DISPLAY_FORMAT));
+
+            case DomainFieldType::TYPE_MONEY:
+                return $column->numeric()->format(fn ($state, ModelWithFields $record) => static::formatMoney($record->getMoney($field->code), $state));
 
             case DomainFieldType::TYPE_ICON:
                 return $column->format(fn ($state, ModelWithFields $record) => IconHelper::render($state, 'size-5', ObjectHelper::getTitle($record)));
@@ -545,6 +550,9 @@ abstract class ManageRecords extends Component
                     ->formatState(fn (?Model $record) => $record instanceof ModelWithFields ? $record->getDateTime($field->code)?->format(static::DATETIME_INPUT_FORMAT) : null)
                     ->dehydrateState(fn ($state) => ModelWithFields::toDateTimeValue($state));
 
+            case DomainFieldType::TYPE_MONEY:
+                return $this->moneyInput($field);
+
             case DomainFieldType::TYPE_ICON:
                 return Input::make($field->code, Input::TYPE_SELECT)
                     ->searchable(fn (?string $search) => IconHelper::getOptions($search), fn ($value) => is_string($value) ? $value : null)
@@ -609,6 +617,51 @@ abstract class ManageRecords extends Component
                 fn ($value) => ObjectHelper::getTitleById($class, $value),
             )
             ->dehydrateState(fn ($state) => ObjectHelper::toId($state));
+    }
+
+    /**
+     * Amount and currency; a fixed currency is shown as the suffix, otherwise it is chosen from the currency LOV.
+     */
+    protected function moneyInput(Field $field): Input
+    {
+        $currency = TypeSettings::currency($field);
+
+        $input = Input::make($field->code, Input::TYPE_MONEY)
+            ->formatState(function (?Model $record) use ($field, $currency) {
+                $money = $record instanceof ModelWithFields ? $record->getMoney($field->code) : null;
+
+                return [
+                    Money::KEY_AMOUNT => $money?->amount,
+                    Money::KEY_CURRENCY => $money->currency ?? $currency ?? static::defaultCurrency(),
+                ];
+            })
+            ->validationState(fn ($state) => ModelWithFields::toMoneyValue($state))
+            ->dehydrateState(fn ($state) => ModelWithFields::toMoneyValue($state));
+
+        if ($currency !== null) {
+            return $input->suffix(Currency::symbolOf($currency));
+        }
+
+        return $input->options(fn () => array_map('strval', app(LovRegistry::class)->getLovItemsOptions(Currency::CODE)));
+    }
+
+    /**
+     * Currency preselected in a new money input: the only one of the LOV, otherwise none.
+     */
+    protected static function defaultCurrency(): ?string
+    {
+        $codes = array_keys(app(LovRegistry::class)->getLovItemsOptions(Currency::CODE));
+
+        return count($codes) === 1 ? (string)$codes[0] : null;
+    }
+
+    protected static function formatMoney(?Money $money, mixed $state): ?string
+    {
+        if ($money) {
+            return $money->format();
+        }
+
+        return is_scalar($state) ? (string)$state : null;
     }
 
     protected static function displayUnit(Field $field): string
@@ -695,6 +748,20 @@ abstract class ManageRecords extends Component
         }
 
         return $result;
+    }
+
+    /**
+     * Form data as the validation sees it: inputs may replace their values (Input::validationState()).
+     */
+    protected function prepareForValidation($attributes)
+    {
+        foreach ($this->getInputs() as $path => $input) {
+            if ($input->hasValidationState()) {
+                data_set($attributes, 'data.'.$path, $input->getValidationState(data_get($attributes, 'data.'.$path)));
+            }
+        }
+
+        return $attributes;
     }
 
     /**

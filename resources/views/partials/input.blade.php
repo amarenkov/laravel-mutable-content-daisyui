@@ -33,6 +33,24 @@
                                                  :search-model="$input->isSearchable() ? 'optionSearch.'.$input->statePath : null" />
             @break
 
+        @case(Input::TYPE_MONEY)
+            @php($currencies = $input->getOptions($data, $record))
+            <div class="flex gap-2">
+                <x-mutable-content-daisyui::input :model="$model.'.amount'" :live="$input->isLive()" :disabled="$disabled" :error="(bool)$error"
+                                                  type="number" step="any" inputmode="decimal"
+                                                  :placeholder="$placeholder"
+                                                  :suffix="$input->getSuffix()" />
+                @if ($currencies)
+                    <div class="w-32 shrink-0">
+                        <x-mutable-content-daisyui::combobox :model="$model.'.currency'" :live="$input->isLive()" :disabled="$disabled" :error="(bool)$error"
+                                                             :options="$currencies"
+                                                             :nullable="false"
+                                                             :placeholder="__('Currency')" />
+                    </div>
+                @endif
+            </div>
+            @break
+
         @default
             <x-mutable-content-daisyui::input :model="$model" :live="$input->isLive()" :disabled="$disabled" :error="(bool)$error"
                                               :type="match ($input->type) { Input::TYPE_NUMBER, Input::TYPE_INTEGER => 'number', Input::TYPE_DATE => 'date', Input::TYPE_DATETIME => 'datetime-local', default => 'text' }"

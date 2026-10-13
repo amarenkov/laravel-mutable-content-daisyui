@@ -20,6 +20,7 @@ class Input
     public const TYPE_TOGGLE = 'toggle';
     public const TYPE_DATE = 'date';
     public const TYPE_DATETIME = 'datetime';
+    public const TYPE_MONEY = 'money';
 
     // static
     public static function make(string $statePath, string $type = self::TYPE_TEXT): static
@@ -58,6 +59,7 @@ class Input
 
     protected ?Closure $formatState = null;
     protected ?Closure $dehydrateState = null;
+    protected ?Closure $validationState = null;
 
     // public
     final public function __construct(
@@ -354,6 +356,28 @@ class Input
         $this->dehydrateState = $dehydrateState;
 
         return $this;
+    }
+
+    /**
+     * Value the validation sees instead of the form value, e.g. null for a money input with an empty amount.
+     *
+     * @param Closure(mixed $state): mixed $validationState
+     */
+    public function validationState(Closure $validationState): static
+    {
+        $this->validationState = $validationState;
+
+        return $this;
+    }
+
+    public function hasValidationState(): bool
+    {
+        return $this->validationState !== null;
+    }
+
+    public function getValidationState(mixed $state): mixed
+    {
+        return $this->validationState ? ($this->validationState)($state) : $state;
     }
 
     public function getFormState(?Model $record): mixed
