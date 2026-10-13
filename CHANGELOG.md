@@ -7,6 +7,8 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-13
+
 ### Added
 
 - Money fields: an amount input with a currency select (the items of the `currency` LOV; the only currency is preselected), a fixed currency (`currency` setting) is the amount suffix; the column shows the amount with the currency symbol. An empty amount is no value: `Input::validationState()` gives the validation another value than the form one, `ManageRecords::prepareForValidation()` applies it. Icon `banknote`.
@@ -79,7 +81,8 @@ Initial release.
 - Lucide icons: the interface, field type icons kept in the package (an icon set for the item in
   the admin panel takes precedence) and icon fields storing Lucide icon names.
 
-[Unreleased]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.3.2...HEAD
+[Unreleased]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.2.0...v0.3.0
