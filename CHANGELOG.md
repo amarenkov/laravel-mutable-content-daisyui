@@ -7,6 +7,8 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-10-15
+
 ### Added
 
 - "Digits after the point" setting of money fields in the field and usage forms (the `decimals` type setting of the core); money columns use it.
@@ -93,7 +95,8 @@ Initial release.
 - Lucide icons: the interface, field type icons kept in the package (an icon set for the item in
   the admin panel takes precedence) and icon fields storing Lucide icon names.
 
-[Unreleased]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.3.0...v0.3.1
