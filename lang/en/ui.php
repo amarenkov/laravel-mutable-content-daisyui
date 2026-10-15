@@ -70,6 +70,9 @@ return [
         'currency' => 'Currency',
         'currency_helper' => 'The only currency of the field: it is not chosen on input. Stored values keep their currency and are not converted.',
         'any_currency' => 'Any from the LOV',
+        'decimals' => 'Digits after the point',
+        'decimals_helper' => 'Digits the amount keeps instead of those of the currency, e.g. for unit prices.',
+        'currency_decimals' => 'As in the currency',
 
         'describe' => [
             'display_unit' => 'display in :unit',
@@ -78,6 +81,7 @@ return [
             'unlisted_codes' => 'unlisted codes',
             'listed_codes_only' => 'listed codes only',
             'currency' => 'currency :currency',
+            'decimals' => ':decimals digits after the point',
             'allow_negative' => 'allow negative',
             'no_negative' => 'no negative',
             'allow_zero' => 'allow 0',

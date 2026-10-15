@@ -7,6 +7,18 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- "Digits after the point" setting of money fields in the field and usage forms (the `decimals` type setting of the core); money columns use it.
+
+### Fixed
+
+- A number or money field created on the fields screen no longer gets "Allow negative values" and "Allow 0" switched off: the switches take the defaults of the chosen type.
+
+### Changed
+
+- Requires core ^0.7.7.
+
 ## [0.4.0] - 2026-10-13
 
 ### Added

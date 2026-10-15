@@ -285,7 +285,7 @@ abstract class ManageRecords extends Component
                 return $column->format(fn ($state, ModelWithFields $record) => $record->getDateTime($field->code)?->format(static::DATETIME_DISPLAY_FORMAT));
 
             case DomainFieldType::TYPE_MONEY:
-                return $column->numeric()->format(fn ($state, ModelWithFields $record) => static::formatMoney($record->getMoney($field->code), $state));
+                return $column->numeric()->format(fn ($state, ModelWithFields $record) => static::formatMoney($record->getMoney($field->code), $state, TypeSettings::decimals($field)));
 
             case DomainFieldType::TYPE_ICON:
                 return $column->format(fn ($state, ModelWithFields $record) => IconHelper::render($state, 'size-5', ObjectHelper::getTitle($record)));
@@ -655,10 +655,10 @@ abstract class ManageRecords extends Component
         return count($codes) === 1 ? (string)$codes[0] : null;
     }
 
-    protected static function formatMoney(?Money $money, mixed $state): ?string
+    protected static function formatMoney(?Money $money, mixed $state, ?int $decimals = null): ?string
     {
         if ($money) {
-            return $money->format();
+            return $money->format($decimals);
         }
 
         return is_scalar($state) ? (string)$state : null;

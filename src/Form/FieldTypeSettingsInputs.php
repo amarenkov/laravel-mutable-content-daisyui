@@ -16,6 +16,8 @@ use Amarenkov\MutableContent\Models\Lov\Currency;
 
 use Amarenkov\MutableContent\Models\ModelWithFields;
 
+use Amarenkov\MutableContent\ValueObjects\Money;
+
 /**
  * Field type settings inputs for the field and usage forms.
  */
@@ -27,6 +29,7 @@ class FieldTypeSettingsInputs
     public const ALLOW_ZERO_STATE_PATH = Field::CODE_FIELD_TYPE_SETTINGS.'.'.TypeSettings::ALLOW_ZERO;
     public const ALLOW_NEGATIVE_STATE_PATH = Field::CODE_FIELD_TYPE_SETTINGS.'.'.TypeSettings::ALLOW_NEGATIVE;
     public const CURRENCY_STATE_PATH = Field::CODE_FIELD_TYPE_SETTINGS.'.'.TypeSettings::CURRENCY;
+    public const DECIMALS_STATE_PATH = Field::CODE_FIELD_TYPE_SETTINGS.'.'.TypeSettings::DECIMALS;
     public const LINK_BY_CODE_STATE_PATH = Field::CODE_FIELD_TYPE_SETTINGS.'.'.TypeSettings::LINK_BY_CODE;
 
     protected const FLAG_TRUE = '1';
@@ -45,6 +48,7 @@ class FieldTypeSettingsInputs
             + static::linkByCodeInputs($fieldType, $inherited)
             + static::allowUnlistedCodesInputs($fieldType, $inherited)
             + static::currencyInputs($fieldType, $inherited)
+            + static::decimalsInputs($fieldType, $inherited)
             + static::signInputs($fieldType, $inherited);
     }
 
@@ -153,6 +157,37 @@ class FieldTypeSettingsInputs
                     : __('mutable-content-daisyui::ui.settings.inherited', ['value' => app(LovRegistry::class)->getLovItemLabel(Currency::CODE, $currency) ?? $currency]);
             })
             ->formatState(fn (?Model $record) => static::recordSetting($record, TypeSettings::CURRENCY))
+            ->visible(fn (array $data, ?Model $record) => (string)$fieldType($data, $record) === FieldType::TYPE_MONEY);
+
+        return [$input->statePath => $input];
+    }
+
+    /**
+     * Digits after the point of a money field instead of the currency ones.
+     *
+     * @return array<string, Input>
+     */
+    protected static function decimalsInputs(Closure $fieldType, ?Closure $inherited): array
+    {
+        $values = array_map('strval', range(0, Money::MAX_DECIMALS));
+
+        $input = Input::make(self::DECIMALS_STATE_PATH, Input::TYPE_SELECT)
+            ->label(__('mutable-content-daisyui::ui.settings.decimals'))
+            ->helper(__('mutable-content-daisyui::ui.settings.decimals_helper'))
+            ->options(fn () => array_combine($values, $values))
+            ->placeholder(function () use ($inherited) {
+                $decimals = $inherited ? ($inherited()[TypeSettings::DECIMALS] ?? null) : null;
+
+                return is_int($decimals)
+                    ? __('mutable-content-daisyui::ui.settings.inherited', ['value' => $decimals])
+                    : __('mutable-content-daisyui::ui.settings.currency_decimals');
+            })
+            ->formatState(function (?Model $record) {
+                $decimals = static::recordSetting($record, TypeSettings::DECIMALS);
+
+                return is_int($decimals) ? (string)$decimals : null;
+            })
+            ->dehydrateState(fn ($state) => $state === null || $state === '' ? null : (int)$state)
             ->visible(fn (array $data, ?Model $record) => (string)$fieldType($data, $record) === FieldType::TYPE_MONEY);
 
         return [$input->statePath => $input];
@@ -307,6 +342,10 @@ class FieldTypeSettingsInputs
             $result[] = __('mutable-content-daisyui::ui.settings.describe.currency', ['currency' => $settings[TypeSettings::CURRENCY]]);
         }
 
+        if ($fieldType === FieldType::TYPE_MONEY && is_int($settings[TypeSettings::DECIMALS] ?? null)) {
+            $result[] = __('mutable-content-daisyui::ui.settings.describe.decimals', ['decimals' => $settings[TypeSettings::DECIMALS]]);
+        }
+
         if (static::hasSignSettings($fieldType)) {
             $allowNegative = $settings[TypeSettings::ALLOW_NEGATIVE] ?? null;
 
@@ -326,6 +365,19 @@ class FieldTypeSettingsInputs
         }
 
         return $result;
+    }
+
+    /**
+     * Values of the sign settings that are not set, for a field of the type.
+     *
+     * @return array<string, bool>
+     */
+    public static function defaultSignSettings(?string $fieldType): array
+    {
+        return [
+            self::ALLOW_NEGATIVE_STATE_PATH => TypeSettings::getDefaultValue((string)$fieldType, TypeSettings::ALLOW_NEGATIVE) === true,
+            self::ALLOW_ZERO_STATE_PATH => TypeSettings::getDefaultValue((string)$fieldType, TypeSettings::ALLOW_ZERO) === true,
+        ];
     }
 
     public static function defaultDisplayUnit(?string $fieldType): ?string

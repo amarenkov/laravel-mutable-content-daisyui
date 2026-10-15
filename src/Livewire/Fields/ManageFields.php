@@ -258,6 +258,10 @@ class ManageFields extends ManageRecords
     {
         if ($key === Field::CODE_FIELD_TYPE) {
             data_set($this->data, FieldTypeSettingsInputs::DISPLAY_UNIT_STATE_PATH, FieldTypeSettingsInputs::defaultDisplayUnit($value));
+
+            foreach (FieldTypeSettingsInputs::defaultSignSettings($value) as $statePath => $default) {
+                data_set($this->data, $statePath, $default);
+            }
         }
     }
 

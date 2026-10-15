@@ -155,4 +155,52 @@ class MoneyTest extends TestCase
         $this->assertEquals([TypeSettings::ALLOW_ZERO => false, TypeSettings::CURRENCY => Currency::USD], Field::where('code', 'total')->first()->getField('field_type_settings'));
         $this->assertSame(['currency USD', 'no 0'], FieldTypeSettingsInputs::describe(Type::TYPE_MONEY, [TypeSettings::ALLOW_ZERO => false, TypeSettings::CURRENCY => Currency::USD]));
     }
+
+    public function test_new_money_field_keeps_the_sign_defaults(): void
+    {
+        Livewire::test(ManageFields::class)
+            ->call('create')
+            ->set('data.code', 'total')
+            ->set('data.label', 'Total')
+            ->set('data.field_type', Type::TYPE_MONEY)
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertNull(Field::where('code', 'total')->first()->getField('field_type_settings'));
+    }
+
+    public function test_decimals_setting_is_saved_validated_and_shown(): void
+    {
+        Livewire::test(ManageFields::class)
+            ->call('create')
+            ->set('data.code', 'unit_price')
+            ->set('data.label', 'Unit price')
+            ->set('data.field_type', Type::TYPE_MONEY)
+            ->set('data.'.FieldTypeSettingsInputs::DECIMALS_STATE_PATH, '6')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertSame([TypeSettings::DECIMALS => 6], Field::where('code', 'unit_price')->first()->getField('field_type_settings'));
+        $this->assertSame(['6 digits after the point'], FieldTypeSettingsInputs::describe(Type::TYPE_MONEY, [TypeSettings::DECIMALS => 6]));
+
+        Field::where('code', 'unit_price')->forceDelete();
+
+        $lov = $this->makeLovWithMoneyField([TypeSettings::DECIMALS => 6]);
+
+        $component = Livewire::test(ManageItems::class, ['lov' => 'product'])
+            ->call('create')
+            ->set('data.code', 'tea')
+            ->set('data.label', 'Tea')
+            ->set('data.price.amount', '0.0045201')
+            ->set('data.price.currency', Currency::USD)
+            ->call('save')
+            ->assertHasErrors(['data.price'])
+            ->set('data.price.amount', '0.00452')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $item = Item::where('lov_id', $lov->id)->first();
+
+        $this->assertSame("0.004520\u{00A0}$", (string)$component->instance()->getColumns()['price']->render($item));
+    }
 }
