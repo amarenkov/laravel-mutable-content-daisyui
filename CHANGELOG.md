@@ -7,9 +7,11 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-10-19
+
 ### Added
 
-- `secret` fields: a password input (`Input::TYPE_SECRET`) that never sends the stored value to the page; an empty input keeps it, so a required secret is asked only once. The table column and the input placeholder show the mask with a few characters at the ends (`sk****9f`); the field and usage forms set how many (`visible_start`, `visible_end`). Requires the core with the `secret` type.
+- `secret` fields: a password input (`Input::TYPE_SECRET`) that never sends the stored value to the page; an empty input keeps it, so a required secret is asked only once. The table column and the input placeholder show the mask with a few characters at the ends (`sk****9f`); the field and usage forms set how many (`visible_start`, `visible_end`). Requires `amarenkov/laravel-mutable-content` ^0.7.9.
 
 ## [0.4.1] - 2026-10-15
 
@@ -99,7 +101,8 @@ Initial release.
 - Lucide icons: the interface, field type icons kept in the package (an icon set for the item in
   the admin panel takes precedence) and icon fields storing Lucide icon names.
 
-[Unreleased]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.4.2...HEAD
+[0.4.2]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.3.1...v0.3.2
