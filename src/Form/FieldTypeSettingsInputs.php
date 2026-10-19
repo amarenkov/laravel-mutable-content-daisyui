@@ -30,6 +30,8 @@ class FieldTypeSettingsInputs
     public const ALLOW_NEGATIVE_STATE_PATH = Field::CODE_FIELD_TYPE_SETTINGS.'.'.TypeSettings::ALLOW_NEGATIVE;
     public const CURRENCY_STATE_PATH = Field::CODE_FIELD_TYPE_SETTINGS.'.'.TypeSettings::CURRENCY;
     public const DECIMALS_STATE_PATH = Field::CODE_FIELD_TYPE_SETTINGS.'.'.TypeSettings::DECIMALS;
+    public const VISIBLE_START_STATE_PATH = Field::CODE_FIELD_TYPE_SETTINGS.'.'.TypeSettings::VISIBLE_START;
+    public const VISIBLE_END_STATE_PATH = Field::CODE_FIELD_TYPE_SETTINGS.'.'.TypeSettings::VISIBLE_END;
     public const LINK_BY_CODE_STATE_PATH = Field::CODE_FIELD_TYPE_SETTINGS.'.'.TypeSettings::LINK_BY_CODE;
 
     protected const FLAG_TRUE = '1';
@@ -49,6 +51,7 @@ class FieldTypeSettingsInputs
             + static::allowUnlistedCodesInputs($fieldType, $inherited)
             + static::currencyInputs($fieldType, $inherited)
             + static::decimalsInputs($fieldType, $inherited)
+            + static::visibleInputs($fieldType, $inherited)
             + static::signInputs($fieldType, $inherited);
     }
 
@@ -191,6 +194,42 @@ class FieldTypeSettingsInputs
             ->visible(fn (array $data, ?Model $record) => (string)$fieldType($data, $record) === FieldType::TYPE_MONEY);
 
         return [$input->statePath => $input];
+    }
+
+    /**
+     * Characters of a secret shown at the start and at the end.
+     *
+     * @return array<string, Input>
+     */
+    protected static function visibleInputs(Closure $fieldType, ?Closure $inherited): array
+    {
+        $values = array_map('strval', range(0, TypeSettings::MAX_VISIBLE));
+        $inputs = [];
+
+        foreach ([TypeSettings::VISIBLE_START => self::VISIBLE_START_STATE_PATH, TypeSettings::VISIBLE_END => self::VISIBLE_END_STATE_PATH] as $setting => $statePath) {
+            $input = Input::make($statePath, Input::TYPE_SELECT)
+                ->label(__('mutable-content-daisyui::ui.settings.'.$setting))
+                ->helper(__('mutable-content-daisyui::ui.settings.visible_helper'))
+                ->options(fn () => array_combine($values, $values))
+                ->placeholder(function () use ($inherited, $setting) {
+                    $value = $inherited ? ($inherited()[$setting] ?? null) : null;
+
+                    return is_int($value)
+                        ? __('mutable-content-daisyui::ui.settings.inherited', ['value' => $value])
+                        : __('mutable-content-daisyui::ui.settings.default', ['value' => TypeSettings::DEFAULT_VISIBLE]);
+                })
+                ->formatState(function (?Model $record) use ($setting) {
+                    $value = static::recordSetting($record, $setting);
+
+                    return is_int($value) ? (string)$value : null;
+                })
+                ->dehydrateState(fn ($state) => $state === null || $state === '' ? null : (int)$state)
+                ->visible(fn (array $data, ?Model $record) => (string)$fieldType($data, $record) === FieldType::TYPE_SECRET);
+
+            $inputs[$statePath] = $input;
+        }
+
+        return $inputs;
     }
 
     /**
@@ -344,6 +383,12 @@ class FieldTypeSettingsInputs
 
         if ($fieldType === FieldType::TYPE_MONEY && is_int($settings[TypeSettings::DECIMALS] ?? null)) {
             $result[] = __('mutable-content-daisyui::ui.settings.describe.decimals', ['decimals' => $settings[TypeSettings::DECIMALS]]);
+        }
+
+        foreach ([TypeSettings::VISIBLE_START, TypeSettings::VISIBLE_END] as $setting) {
+            if ($fieldType === FieldType::TYPE_SECRET && is_int($settings[$setting] ?? null)) {
+                $result[] = __('mutable-content-daisyui::ui.settings.describe.'.$setting, ['count' => $settings[$setting]]);
+            }
         }
 
         if (static::hasSignSettings($fieldType)) {

@@ -290,6 +290,9 @@ abstract class ManageRecords extends Component
             case DomainFieldType::TYPE_ICON:
                 return $column->format(fn ($state, ModelWithFields $record) => IconHelper::render($state, 'size-5', ObjectHelper::getTitle($record)));
 
+            case DomainFieldType::TYPE_SECRET:
+                return $column->format(fn ($state, ModelWithFields $record) => $record->maskedSecret($field->code));
+
             default:
                 return $column;
         }
@@ -553,6 +556,12 @@ abstract class ManageRecords extends Component
             case DomainFieldType::TYPE_MONEY:
                 return $this->moneyInput($field);
 
+            case DomainFieldType::TYPE_SECRET:
+                return Input::make($field->code, Input::TYPE_SECRET)
+                    ->formatState(fn () => null)
+                    ->placeholder(fn (array $data, ?Model $record) => static::keepsSecret($record, $field->code) && $record instanceof ModelWithFields ? $record->maskedSecret($field->code) : null)
+                    ->helper(fn (array $data, ?Model $record) => static::keepsSecret($record, $field->code) ? __('mutable-content-daisyui::ui.secret_kept') : null);
+
             case DomainFieldType::TYPE_ICON:
                 return Input::make($field->code, Input::TYPE_SELECT)
                     ->searchable(fn (?string $search) => IconHelper::getOptions($search), fn ($value) => is_string($value) ? $value : null)
@@ -646,6 +655,14 @@ abstract class ManageRecords extends Component
     }
 
     /**
+     * Whether a secret input of the record already has a value: the form never shows it, an empty input keeps it.
+     */
+    protected static function keepsSecret(?Model $record, string $path): bool
+    {
+        return $record instanceof ModelWithFields && filled(data_get($record->getAttribute('fields'), $path));
+    }
+
+    /**
      * Currency preselected in a new money input: the only one of the LOV, otherwise none.
      */
     protected static function defaultCurrency(): ?string
@@ -730,6 +747,10 @@ abstract class ManageRecords extends Component
                 $inputRules[] = 'required';
             }
 
+            if ($input->type === Input::TYPE_SECRET && static::keepsSecret($record, $path)) {
+                $inputRules = ['nullable', ...array_filter($inputRules, fn ($rule) => !in_array($rule, ['nullable', 'required'], true))];
+            }
+
             $rules['data.'.$path] = [...$inputRules, ...$input->getRules($this->data, $record)];
         }
 
@@ -773,6 +794,10 @@ abstract class ManageRecords extends Component
 
         foreach ($this->visibleInputs($record) as $path => $input) {
             if ($input->isDisabled($this->data, $record)) {
+                continue;
+            }
+
+            if ($input->type === Input::TYPE_SECRET && blank(data_get($this->data, $path)) && static::keepsSecret($record, $path)) {
                 continue;
             }
 

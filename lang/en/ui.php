@@ -24,6 +24,7 @@ return [
     'delete_confirm' => 'Delete ":title"?',
     'delete_denied' => 'Cannot be deleted',
     'deleted' => 'Deleted',
+    'secret_kept' => 'Leave empty to keep the current value',
     'saved' => 'Saved',
     'cancel' => 'Cancel',
     'actions' => 'Actions',
@@ -74,7 +75,13 @@ return [
         'decimals_helper' => 'Digits the amount keeps instead of those of the currency, e.g. for unit prices.',
         'currency_decimals' => 'As in the currency',
 
+        'visible_start' => 'Characters shown at the start',
+        'visible_end' => 'Characters shown at the end',
+        'visible_helper' => 'The rest is shown as asterisks; a short secret is hidden entirely.',
+        'default' => 'Default: :value',
         'describe' => [
+            'visible_start' => ':count characters shown at the start',
+            'visible_end' => ':count characters shown at the end',
             'display_unit' => 'display in :unit',
             'link_by_code' => 'link by code',
             'link_by_id' => 'link by id',

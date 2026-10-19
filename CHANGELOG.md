@@ -7,6 +7,10 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `secret` fields: a password input (`Input::TYPE_SECRET`) that never sends the stored value to the page; an empty input keeps it, so a required secret is asked only once. The table column and the input placeholder show the mask with a few characters at the ends (`sk****9f`); the field and usage forms set how many (`visible_start`, `visible_end`). Requires the core with the `secret` type.
+
 ## [0.4.1] - 2026-10-15
 
 ### Added

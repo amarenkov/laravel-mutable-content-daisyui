@@ -24,6 +24,7 @@ return [
     'delete_confirm' => 'Удалить «:title»?',
     'delete_denied' => 'Удалить нельзя',
     'deleted' => 'Удалено',
+    'secret_kept' => 'Оставьте пустым, чтобы не менять',
     'saved' => 'Сохранено',
     'cancel' => 'Отмена',
     'actions' => 'Действия',
@@ -74,7 +75,13 @@ return [
         'decimals_helper' => 'Сколько знаков хранит сумма вместо знаков валюты, например у цен за штуку.',
         'currency_decimals' => 'Как у валюты',
 
+        'visible_start' => 'Видно символов в начале',
+        'visible_end' => 'Видно символов в конце',
+        'visible_helper' => 'Остальное - звёздочками; короткий секрет скрыт целиком.',
+        'default' => 'По умолчанию: :value',
         'describe' => [
+            'visible_start' => 'видно в начале: :count',
+            'visible_end' => 'видно в конце: :count',
             'display_unit' => 'отображать в :unit',
             'link_by_code' => 'связь по коду',
             'link_by_id' => 'связь по id',

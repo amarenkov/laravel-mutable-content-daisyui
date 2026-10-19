@@ -51,6 +51,13 @@
             </div>
             @break
 
+        @case(Input::TYPE_SECRET)
+            <x-mutable-content-daisyui::input :model="$model" :disabled="$disabled" :error="(bool)$error"
+                                              type="password" autocomplete="new-password"
+                                              :maxlength="$input->getMaxLength()"
+                                              :placeholder="$placeholder" />
+            @break
+
         @default
             <x-mutable-content-daisyui::input :model="$model" :live="$input->isLive()" :disabled="$disabled" :error="(bool)$error"
                                               :type="match ($input->type) { Input::TYPE_NUMBER, Input::TYPE_INTEGER => 'number', Input::TYPE_DATE => 'date', Input::TYPE_DATETIME => 'datetime-local', default => 'text' }"

@@ -21,6 +21,7 @@ class Input
     public const TYPE_DATE = 'date';
     public const TYPE_DATETIME = 'datetime';
     public const TYPE_MONEY = 'money';
+    public const TYPE_SECRET = 'secret';
 
     // static
     public static function make(string $statePath, string $type = self::TYPE_TEXT): static

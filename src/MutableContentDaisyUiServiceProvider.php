@@ -44,6 +44,7 @@ class MutableContentDaisyUiServiceProvider extends ServiceProvider
             DomainFieldType::TYPE_DATETIME => 'calendar-clock',
             DomainFieldType::TYPE_MONEY => 'banknote',
             DomainFieldType::TYPE_ICON => 'image',
+            DomainFieldType::TYPE_SECRET => 'key-round',
             DomainFieldType::TYPE_SYSTEM => 'settings',
         ];
     }
