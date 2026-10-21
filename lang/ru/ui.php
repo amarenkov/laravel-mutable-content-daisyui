@@ -55,6 +55,8 @@ return [
         'classes' => 'Классы',
     ],
 
+    'markdown_helper' => 'Markdown: **жирный**, *курсив*, списки, [ссылки](https://example.com).',
+
     'settings' => [
         'inherited' => 'Как у поля: :value',
         'display_unit' => 'Отображать в единицах',
@@ -79,7 +81,14 @@ return [
         'visible_end' => 'Видно символов в конце',
         'visible_helper' => 'Остальное - звёздочками; короткий секрет скрыт целиком.',
         'default' => 'По умолчанию: :value',
+        'format' => 'Формат',
+        'format_helper' => 'Текст в Markdown показывается с заголовками, списками и ссылками.',
+        'formats' => [
+            'plain' => 'Обычный текст',
+            'markdown' => 'Markdown',
+        ],
         'describe' => [
+            'markdown' => 'Markdown',
             'visible_start' => 'видно в начале: :count',
             'visible_end' => 'видно в конце: :count',
             'display_unit' => 'отображать в :unit',

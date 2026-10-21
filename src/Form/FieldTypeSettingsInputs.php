@@ -33,6 +33,7 @@ class FieldTypeSettingsInputs
     public const VISIBLE_START_STATE_PATH = Field::CODE_FIELD_TYPE_SETTINGS.'.'.TypeSettings::VISIBLE_START;
     public const VISIBLE_END_STATE_PATH = Field::CODE_FIELD_TYPE_SETTINGS.'.'.TypeSettings::VISIBLE_END;
     public const LINK_BY_CODE_STATE_PATH = Field::CODE_FIELD_TYPE_SETTINGS.'.'.TypeSettings::LINK_BY_CODE;
+    public const FORMAT_STATE_PATH = Field::CODE_FIELD_TYPE_SETTINGS.'.'.TypeSettings::FORMAT;
 
     protected const FLAG_TRUE = '1';
     protected const FLAG_FALSE = '0';
@@ -52,6 +53,7 @@ class FieldTypeSettingsInputs
             + static::currencyInputs($fieldType, $inherited)
             + static::decimalsInputs($fieldType, $inherited)
             + static::visibleInputs($fieldType, $inherited)
+            + static::formatInputs($fieldType, $inherited)
             + static::signInputs($fieldType, $inherited);
     }
 
@@ -192,6 +194,30 @@ class FieldTypeSettingsInputs
             })
             ->dehydrateState(fn ($state) => $state === null || $state === '' ? null : (int)$state)
             ->visible(fn (array $data, ?Model $record) => (string)$fieldType($data, $record) === FieldType::TYPE_MONEY);
+
+        return [$input->statePath => $input];
+    }
+
+    /**
+     * Markup of a text field.
+     *
+     * @return array<string, Input>
+     */
+    protected static function formatInputs(Closure $fieldType, ?Closure $inherited): array
+    {
+        $input = Input::make(self::FORMAT_STATE_PATH, Input::TYPE_SELECT)
+            ->label(__('mutable-content-daisyui::ui.settings.format'))
+            ->helper(__('mutable-content-daisyui::ui.settings.format_helper'))
+            ->options(fn () => array_combine(TypeSettings::FORMATS, array_map(fn ($format) => __('mutable-content-daisyui::ui.settings.formats.'.$format), TypeSettings::FORMATS)))
+            ->placeholder(function () use ($inherited) {
+                $format = $inherited ? ($inherited()[TypeSettings::FORMAT] ?? null) : null;
+
+                return in_array($format, TypeSettings::FORMATS, true)
+                    ? __('mutable-content-daisyui::ui.settings.inherited', ['value' => __('mutable-content-daisyui::ui.settings.formats.'.$format)])
+                    : __('mutable-content-daisyui::ui.settings.default', ['value' => __('mutable-content-daisyui::ui.settings.formats.'.TypeSettings::FORMAT_PLAIN)]);
+            })
+            ->formatState(fn (?Model $record) => static::recordSetting($record, TypeSettings::FORMAT))
+            ->visible(fn (array $data, ?Model $record) => (string)$fieldType($data, $record) === FieldType::TYPE_TEXT);
 
         return [$input->statePath => $input];
     }
@@ -383,6 +409,10 @@ class FieldTypeSettingsInputs
 
         if ($fieldType === FieldType::TYPE_MONEY && is_int($settings[TypeSettings::DECIMALS] ?? null)) {
             $result[] = __('mutable-content-daisyui::ui.settings.describe.decimals', ['decimals' => $settings[TypeSettings::DECIMALS]]);
+        }
+
+        if ($fieldType === FieldType::TYPE_TEXT && ($settings[TypeSettings::FORMAT] ?? null) === TypeSettings::FORMAT_MARKDOWN) {
+            $result[] = __('mutable-content-daisyui::ui.settings.describe.markdown');
         }
 
         foreach ([TypeSettings::VISIBLE_START, TypeSettings::VISIBLE_END] as $setting) {

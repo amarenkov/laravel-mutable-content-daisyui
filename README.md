@@ -144,7 +144,7 @@ Default icons for the items of other LOVs are added with
 Screens are built from the package Blade components, e.g. `<x-mutable-content-daisyui::button>`,
 `::modal`, `::field`, `::input`, `::select`, `::textarea`, `::toggle`, `::checkbox`,
 `::combobox`, `::segmented`, `::dropdown`, `::collapse`, `::badge`, `::status`, `::card`, `::table`, `::breadcrumbs`,
-`::notifications`.
+`::notifications`, `::markdown`.
 
 `::combobox` replaces selects in forms and filters: a list with search (in the browser for short
 lists, on the server for long ones such as objects and icons), option icons, keyboard navigation
@@ -154,6 +154,9 @@ with the `mutable-content-notify` browser event (`type`, `title`, `body`).
 `::segmented` is a group of buttons for one value (a radio group bound with `model`, live by default).
 `::status` is a small status dot (`variant`, `pulse`). `::card` wraps a table as is; with `title`,
 an `actions` slot or `body` it gets padding, the title and the actions in a row.
+`::markdown` shows the Markdown of a text field (`text`) as HTML: raw HTML is escaped and unsafe
+links are dropped (`Helpers\MarkdownHelper::toHtml()`, `toText()` for one-line previews). Text
+fields with the `markdown` format get a Markdown hint in forms and a plain text preview in tables.
 
 ## Translations
 

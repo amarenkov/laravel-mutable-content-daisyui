@@ -42,6 +42,7 @@ use Amarenkov\MutableContent\ValueObjects\SurfaceDensity;
 use Amarenkov\MutableContentDaisyUi\Exceptions\SaveFailed;
 use Amarenkov\MutableContentDaisyUi\Form\Input;
 use Amarenkov\MutableContentDaisyUi\Helpers\IconHelper;
+use Amarenkov\MutableContentDaisyUi\Helpers\MarkdownHelper;
 use Amarenkov\MutableContentDaisyUi\Helpers\SaveHelper;
 use Amarenkov\MutableContentDaisyUi\Livewire\Concerns\RemembersPath;
 use Amarenkov\MutableContentDaisyUi\Table\Column;
@@ -249,7 +250,13 @@ abstract class ManageRecords extends Component
                 return $column->numeric()->format(fn ($state) => is_numeric($state) ? static::formatNumber($state) : $state);
 
             case DomainFieldType::TYPE_TEXT:
-                return $column->format(function ($state) {
+                $markdown = TypeSettings::isMarkdown($field);
+
+                return $column->format(function ($state) use ($markdown) {
+                    if ($markdown && is_string($state)) {
+                        $state = MarkdownHelper::toText($state);
+                    }
+
                     if (!is_string($state) || mb_strlen($state) <= 50) {
                         return $state;
                     }
@@ -270,6 +277,7 @@ abstract class ManageRecords extends Component
             case DomainFieldType::TYPE_LENGTH:
             case DomainFieldType::TYPE_AREA:
             case DomainFieldType::TYPE_VOLUME:
+            case DomainFieldType::TYPE_DURATION:
                 return $column->numeric()->format(static::unitFormatter($field));
 
             case DomainFieldType::TYPE_DENSITY:
@@ -516,7 +524,9 @@ abstract class ManageRecords extends Component
                 return Input::make($field->code, Input::TYPE_TOGGLE);
 
             case DomainFieldType::TYPE_TEXT:
-                return Input::make($field->code, Input::TYPE_TEXTAREA);
+                $input = Input::make($field->code, Input::TYPE_TEXTAREA);
+
+                return TypeSettings::isMarkdown($field) ? $input->helper(__('mutable-content-daisyui::ui.markdown_helper')) : $input;
 
             case DomainFieldType::TYPE_INT:
                 return Input::make($field->code, Input::TYPE_INTEGER);
@@ -537,6 +547,7 @@ abstract class ManageRecords extends Component
             case DomainFieldType::TYPE_LENGTH:
             case DomainFieldType::TYPE_AREA:
             case DomainFieldType::TYPE_VOLUME:
+            case DomainFieldType::TYPE_DURATION:
                 return $this->unitInput($field);
 
             case DomainFieldType::TYPE_DENSITY:

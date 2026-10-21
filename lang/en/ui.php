@@ -55,6 +55,8 @@ return [
         'classes' => 'Classes',
     ],
 
+    'markdown_helper' => 'Markdown: **bold**, *italic*, lists, [links](https://example.com).',
+
     'settings' => [
         'inherited' => 'As in the field: :value',
         'display_unit' => 'Display unit',
@@ -79,7 +81,14 @@ return [
         'visible_end' => 'Characters shown at the end',
         'visible_helper' => 'The rest is shown as asterisks; a short secret is hidden entirely.',
         'default' => 'Default: :value',
+        'format' => 'Format',
+        'format_helper' => 'Markdown text is shown with headings, lists and links.',
+        'formats' => [
+            'plain' => 'Plain text',
+            'markdown' => 'Markdown',
+        ],
         'describe' => [
+            'markdown' => 'Markdown',
             'visible_start' => ':count characters shown at the start',
             'visible_end' => ':count characters shown at the end',
             'display_unit' => 'display in :unit',

@@ -7,6 +7,12 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `duration` fields: entered and shown in the display unit of the field (seconds, minutes or hours), `timer` icon.
+- "Format" setting of text fields in the field and usage forms (plain text or Markdown). Markdown fields get a hint under the input and a plain text preview in tables.
+- `::markdown` component and `Helpers\MarkdownHelper` (`toHtml()`, `toText()`): Markdown rendered with raw HTML escaped and unsafe links dropped.
+
 ## [0.4.2] - 2026-10-19
 
 ### Added

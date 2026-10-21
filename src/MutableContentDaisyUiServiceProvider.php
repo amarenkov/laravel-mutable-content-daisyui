@@ -40,6 +40,7 @@ class MutableContentDaisyUiServiceProvider extends ServiceProvider
             DomainFieldType::TYPE_LENGTH => 'ruler',
             DomainFieldType::TYPE_AREA => 'square-dashed',
             DomainFieldType::TYPE_VOLUME => 'box',
+            DomainFieldType::TYPE_DURATION => 'timer',
             DomainFieldType::TYPE_DATE => 'calendar',
             DomainFieldType::TYPE_DATETIME => 'calendar-clock',
             DomainFieldType::TYPE_MONEY => 'banknote',
