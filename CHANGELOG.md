@@ -7,11 +7,15 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-10-21
+
 ### Added
 
 - `duration` fields: entered and shown in the display unit of the field (seconds, minutes or hours), `timer` icon.
 - "Format" setting of text fields in the field and usage forms (plain text or Markdown). Markdown fields get a hint under the input and a plain text preview in tables.
 - `::markdown` component and `Helpers\MarkdownHelper` (`toHtml()`, `toText()`): Markdown rendered with raw HTML escaped and unsafe links dropped.
+
+Requires `amarenkov/laravel-mutable-content` ^0.7.11.
 
 ## [0.4.2] - 2026-10-19
 
@@ -107,7 +111,8 @@ Initial release.
 - Lucide icons: the interface, field type icons kept in the package (an icon set for the item in
   the admin panel takes precedence) and icon fields storing Lucide icon names.
 
-[Unreleased]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.4.2...HEAD
+[Unreleased]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.4.3...HEAD
+[0.4.3]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.3.2...v0.4.0

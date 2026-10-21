@@ -2,7 +2,7 @@
 
 [![tests](https://github.com/amarenkov/laravel-mutable-content-daisyui/actions/workflows/tests.yml/badge.svg)](https://github.com/amarenkov/laravel-mutable-content-daisyui/actions/workflows/tests.yml)
 [![Packagist](https://img.shields.io/packagist/v/amarenkov/laravel-mutable-content-daisyui)](https://packagist.org/packages/amarenkov/laravel-mutable-content-daisyui)
-![coverage](https://img.shields.io/badge/coverage-85%25-green)
+![coverage](https://img.shields.io/badge/coverage-87%25-green)
 
 Blade components on [daisyUI](https://daisyui.com) for
 [`amarenkov/laravel-mutable-content`](https://github.com/amarenkov/laravel-mutable-content).
