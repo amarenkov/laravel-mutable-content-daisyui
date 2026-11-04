@@ -91,6 +91,7 @@ abstract class TestCase extends BaseTestCase
             '--path' => [
                 realpath(__DIR__.'/../vendor/orchestra/testbench-core/laravel/migrations'),
                 realpath(__DIR__.'/../vendor/amarenkov/laravel-mutable-content/database/migrations'),
+                realpath(__DIR__.'/Fixtures/database/migrations'),
             ],
             '--realpath' => true,
         ]);

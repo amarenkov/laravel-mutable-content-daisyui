@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 
 use Livewire\Attributes\Url;
 
+use Amarenkov\MutableContent\Contracts\MutableModel;
 use Amarenkov\MutableContent\Domain\Field\Field;
 use Amarenkov\MutableContent\Domain\Field\Lov\Type as FieldType;
 use Amarenkov\MutableContent\Domain\LovRegistry;
@@ -20,7 +21,6 @@ use Amarenkov\MutableContent\Helpers\ObjectHelper;
 
 use Amarenkov\MutableContent\Models\Field\Field as FieldModel;
 use Amarenkov\MutableContent\Models\Field\Usage as FieldUsageModel;
-use Amarenkov\MutableContent\Models\ModelWithFields;
 
 use Amarenkov\MutableContent\Rules\FieldCode as FieldCodeRule;
 
@@ -49,7 +49,7 @@ class ManageFields extends ManageRecords
     }
 
     /**
-     * @param class-string<ModelWithFields> $mutableClass
+     * @param class-string<Model&MutableModel> $mutableClass
      */
     protected static function boundToType(Builder $query, string $mutableClass, string $typeCode): Builder
     {
@@ -86,7 +86,7 @@ class ManageFields extends ManageRecords
             return $data[Field::CODE_FIELD_TYPE];
         }
 
-        return $record instanceof ModelWithFields ? $record->getField(Field::CODE_FIELD_TYPE) : null;
+        return $record instanceof MutableModel ? $record->getField(Field::CODE_FIELD_TYPE) : null;
     }
 
     protected function inputs(): array
@@ -106,7 +106,7 @@ class ManageFields extends ManageRecords
             ->options(function (array $data, ?Model $record) use ($lovRegistry) {
                 $options = $lovRegistry->getLovItemsOptions(FieldType::CLASS_CODE) ?? [];
 
-                if ($record instanceof ModelWithFields && $record->getField(Field::CODE_FIELD_TYPE) === FieldType::TYPE_SYSTEM) {
+                if ($record instanceof MutableModel && $record->getField(Field::CODE_FIELD_TYPE) === FieldType::TYPE_SYSTEM) {
                     return $options;
                 }
 
@@ -144,8 +144,8 @@ class ManageFields extends ManageRecords
 
         return Column::make('details')
             ->label(__('mutable-content-daisyui::ui.type'))
-            ->state(fn (ModelWithFields $record) => (string)$record->{Field::CODE_FIELD_TYPE})
-            ->format(function ($fieldType, ModelWithFields $record) use ($lovRegistry) {
+            ->state(fn (Model&MutableModel $record) => (string)$record->{Field::CODE_FIELD_TYPE})
+            ->format(function ($fieldType, Model&MutableModel $record) use ($lovRegistry) {
                 $result = $lovRegistry->getLovItemLabel(FieldType::CLASS_CODE, $fieldType) ?? $fieldType;
 
                 $detail = match ($fieldType) {
@@ -270,7 +270,7 @@ class ManageFields extends ManageRecords
         return __('mutable-content-daisyui::ui.fields');
     }
 
-    public function recordUrl(ModelWithFields $record): ?string
+    public function recordUrl(Model&MutableModel $record): ?string
     {
         return route(MutableContentDaisyUi::ROUTE_FIELD_USAGE, ['field' => $record->code()]);
     }

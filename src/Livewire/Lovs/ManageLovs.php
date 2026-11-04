@@ -4,9 +4,9 @@ namespace Amarenkov\MutableContentDaisyUi\Livewire\Lovs;
 
 use Illuminate\Database\Eloquent\Model;
 
+use Amarenkov\MutableContent\Contracts\MutableModel;
 use Amarenkov\MutableContent\Domain\Field\Field;
 use Amarenkov\MutableContent\Models\Lov\Lov as LovModel;
-use Amarenkov\MutableContent\Models\ModelWithFields;
 
 use Amarenkov\MutableContentDaisyUi\Livewire\ManageRecords;
 use Amarenkov\MutableContentDaisyUi\MutableContentDaisyUi;
@@ -35,7 +35,7 @@ class ManageLovs extends ManageRecords
         return $inputs;
     }
 
-    protected function deleteDeniedReason(ModelWithFields $record): ?string
+    protected function deleteDeniedReason(Model&MutableModel $record): ?string
     {
         return $record instanceof LovModel && $record->isUsedInFields() ? $record->usedInFieldsMessage() : null;
     }
@@ -46,7 +46,7 @@ class ManageLovs extends ManageRecords
         return __('mutable-content-daisyui::ui.lovs');
     }
 
-    public function recordUrl(ModelWithFields $record): ?string
+    public function recordUrl(Model&MutableModel $record): ?string
     {
         return route(MutableContentDaisyUi::ROUTE_LOV_ITEMS, ['lov' => $record->code()]);
     }

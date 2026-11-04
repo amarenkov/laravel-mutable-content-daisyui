@@ -9,7 +9,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
-use Amarenkov\MutableContent\Models\ModelWithFields;
+use Amarenkov\MutableContent\Contracts\MutableModel;
+
 
 /**
  * Table column: how a record value is shown, sorted and searched.
@@ -56,7 +57,7 @@ class Column
     }
 
     /**
-     * @param Closure(ModelWithFields): mixed $state
+     * @param Closure(Model&MutableModel): mixed $state
      */
     public function state(Closure $state): static
     {
@@ -66,7 +67,7 @@ class Column
     }
 
     /**
-     * @param Closure(mixed $state, ModelWithFields $record): (string|Htmlable|null) $format
+     * @param Closure(mixed $state, Model&MutableModel $record): (string|Htmlable|null) $format
      */
     public function format(Closure $format): static
     {
@@ -177,12 +178,12 @@ class Column
         }
     }
 
-    public function getState(ModelWithFields $record): mixed
+    public function getState(Model&MutableModel $record): mixed
     {
         return $this->state ? ($this->state)($record) : $record->{$this->name};
     }
 
-    public function render(ModelWithFields $record): string|Htmlable|null
+    public function render(Model&MutableModel $record): string|Htmlable|null
     {
         $state = $this->getState($record);
 

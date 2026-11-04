@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Validation\Rule;
 
+use Amarenkov\MutableContent\Contracts\MutableModel;
 use Amarenkov\MutableContent\Domain\Field\Field;
 use Amarenkov\MutableContent\Domain\MutableClassRegistry;
 
 use Amarenkov\MutableContent\Models\Field\Field as FieldModel;
 use Amarenkov\MutableContent\Models\Field\Usage as FieldUsageModel;
-use Amarenkov\MutableContent\Models\ModelWithFields;
 
 use Amarenkov\MutableContent\Rules\FieldAllowedInClass;
 
@@ -58,7 +58,7 @@ class ManageUsage extends ManageRecords
             return $title;
         }
 
-        $typeLabel = is_subclass_of($mutableClass, ModelWithFields::class) ? ($mutableClass::getTypeOptions()[$typeCode] ?? $typeCode) : $typeCode;
+        $typeLabel = is_subclass_of($mutableClass, MutableModel::class) ? ($mutableClass::getTypeOptions()[$typeCode] ?? $typeCode) : $typeCode;
 
         return $title.': '.$typeLabel;
     }
@@ -96,7 +96,7 @@ class ManageUsage extends ManageRecords
      */
     protected static function typeOptionsOf(mixed $mutableClass): array
     {
-        return is_string($mutableClass) && is_subclass_of($mutableClass, ModelWithFields::class) ? $mutableClass::getTypeOptions() : [];
+        return is_string($mutableClass) && is_subclass_of($mutableClass, MutableModel::class) ? $mutableClass::getTypeOptions() : [];
     }
 
     // protected
@@ -134,7 +134,7 @@ class ManageUsage extends ManageRecords
 
         $fieldCode = $this->fieldRecord->code();
 
-        $isSystem = fn (?Model $record) => $record instanceof ModelWithFields && $record->isSystem();
+        $isSystem = fn (?Model $record) => $record instanceof MutableModel && $record->isSystem();
 
         $inputs[FieldUsageModel::CODE_MUTABLE_CLASS]
             ->live()
@@ -161,7 +161,7 @@ class ManageUsage extends ManageRecords
     {
         $payload = parent::payload($record);
 
-        if (!array_key_exists(FieldUsageModel::CODE_TYPE_CODE, $payload) && !($record instanceof ModelWithFields && $record->isSystem())) {
+        if (!array_key_exists(FieldUsageModel::CODE_TYPE_CODE, $payload) && !($record instanceof MutableModel && $record->isSystem())) {
             $payload[FieldUsageModel::CODE_TYPE_CODE] = null;
         }
 
@@ -194,8 +194,8 @@ class ManageUsage extends ManageRecords
 
         return Column::make('usage')
             ->label(__('mutable-content-daisyui::ui.usage'))
-            ->state(fn (ModelWithFields $record) => (string)$record->{FieldUsageModel::CODE_SCOPE})
-            ->format(function ($scope, ModelWithFields $record) use ($fields) {
+            ->state(fn (Model&MutableModel $record) => (string)$record->{FieldUsageModel::CODE_SCOPE})
+            ->format(function ($scope, Model&MutableModel $record) use ($fields) {
                 $text = $fields[FieldUsageModel::CODE_MUTABLE_CLASS]->label.': '.static::getScopeTitle($scope);
 
                 $marks = [];
@@ -214,7 +214,7 @@ class ManageUsage extends ManageRecords
     {
         return Column::make(FieldUsageModel::CODE_FIELD_TYPE_SETTINGS)
             ->label(__('Type settings'))
-            ->state(fn (ModelWithFields $record) => $record->getField(FieldUsageModel::CODE_FIELD_TYPE_SETTINGS))
+            ->state(fn (Model&MutableModel $record) => $record->getField(FieldUsageModel::CODE_FIELD_TYPE_SETTINGS))
             ->format(function ($settings) {
                 $described = FieldTypeSettingsInputs::describe((string)$this->fieldRecord->{Field::CODE_FIELD_TYPE}, $settings);
 
@@ -265,7 +265,7 @@ class ManageUsage extends ManageRecords
         return __('mutable-content-daisyui::ui.usage_title', ['field' => $this->fieldTitle()]);
     }
 
-    public function recordTitle(ModelWithFields $record): string
+    public function recordTitle(Model&MutableModel $record): string
     {
         return static::getScopeTitle((string)$record->{FieldUsageModel::CODE_SCOPE});
     }

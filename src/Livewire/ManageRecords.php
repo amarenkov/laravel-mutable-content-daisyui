@@ -21,6 +21,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+use Amarenkov\MutableContent\Contracts\MutableModel;
 use Amarenkov\MutableContent\Domain\Field\Field;
 use Amarenkov\MutableContent\Domain\Field\Lov\Type as DomainFieldType;
 use Amarenkov\MutableContent\Domain\Field\TypeSettings;
@@ -69,7 +70,7 @@ abstract class ManageRecords extends Component
     protected const UNLISTED_CODE_HINT = 'mutable-content-daisyui::ui.unlisted_code';
 
     // static
-    /** @var class-string<ModelWithFields> */
+    /** @var class-string<Model&MutableModel> */
     protected static string $model;
 
     // protected
@@ -85,10 +86,10 @@ abstract class ManageRecords extends Component
     /** @var ?array<string, Input> */
     protected ?array $inputsCache = null;
 
-    protected ?ModelWithFields $recordCache = null;
+    protected (Model&MutableModel)|null $recordCache = null;
 
     /**
-     * Field usage scopes of the page (see ModelWithFields::getFieldScopes()); null for the class ones.
+     * Field usage scopes of the page (see MutableModel::getFieldScopes()); null for the class ones.
      *
      * @return ?array<string>
      */
@@ -123,26 +124,26 @@ abstract class ManageRecords extends Component
         return $this->parentRelation()?->getQuery() ?? static::$model::query();
     }
 
-    protected function makeRecord(): ModelWithFields
+    protected function makeRecord(): Model&MutableModel
     {
-        return $this->ensureModelWithFields($this->parentRelation()?->make() ?? new (static::$model)());
+        return $this->ensureMutableModel($this->parentRelation()?->make() ?? new (static::$model)());
     }
 
-    protected function findRecord(int|string $id): ModelWithFields
+    protected function findRecord(int|string $id): Model&MutableModel
     {
-        return $this->ensureModelWithFields($this->baseQuery()->findOrFail($id));
+        return $this->ensureMutableModel($this->baseQuery()->findOrFail($id));
     }
 
-    protected function ensureModelWithFields(Model $record): ModelWithFields
+    protected function ensureMutableModel(Model $record): Model&MutableModel
     {
-        if (!$record instanceof ModelWithFields) {
-            throw new LogicException(static::class.' manages '.ModelWithFields::class.' records, got '.get_class($record));
+        if (!$record instanceof MutableModel) {
+            throw new LogicException(static::class.' manages '.MutableModel::class.' records, got '.get_class($record));
         }
 
         return $record;
     }
 
-    protected function getRecord(): ?ModelWithFields
+    protected function getRecord(): (Model&MutableModel)|null
     {
         if ($this->recordId === null) {
             return null;
@@ -216,7 +217,7 @@ abstract class ManageRecords extends Component
             if ($systemMarkInCode && $field->code === Field::COMMON_CODE_CODE) {
                 $isSystemLabel = $fields[Field::COMMON_CODE_IS_SYSTEM]->label;
 
-                $column->format(fn ($state, ModelWithFields $record) => static::textWithMarks((string)$state, $record->isSystem() ? [['lock', $isSystemLabel]] : []));
+                $column->format(fn ($state, Model&MutableModel $record) => static::textWithMarks((string)$state, $record->isSystem() ? [['lock', $isSystemLabel]] : []));
             }
 
             if ($field->fieldType === DomainFieldType::TYPE_ICON) {
@@ -290,16 +291,16 @@ abstract class ManageRecords extends Component
                 return $column->format(fn ($state) => static::formatDate($state));
 
             case DomainFieldType::TYPE_DATETIME:
-                return $column->format(fn ($state, ModelWithFields $record) => $record->getDateTime($field->code)?->format(static::DATETIME_DISPLAY_FORMAT));
+                return $column->format(fn ($state, Model&MutableModel $record) => $record->getDateTime($field->code)?->format(static::DATETIME_DISPLAY_FORMAT));
 
             case DomainFieldType::TYPE_MONEY:
-                return $column->numeric()->format(fn ($state, ModelWithFields $record) => static::formatMoney($record->getMoney($field->code), $state, TypeSettings::decimals($field)));
+                return $column->numeric()->format(fn ($state, Model&MutableModel $record) => static::formatMoney($record->getMoney($field->code), $state, TypeSettings::decimals($field)));
 
             case DomainFieldType::TYPE_ICON:
-                return $column->format(fn ($state, ModelWithFields $record) => IconHelper::render($state, 'size-5', ObjectHelper::getTitle($record)));
+                return $column->format(fn ($state, Model&MutableModel $record) => IconHelper::render($state, 'size-5', ObjectHelper::getTitle($record)));
 
             case DomainFieldType::TYPE_SECRET:
-                return $column->format(fn ($state, ModelWithFields $record) => $record->maskedSecret($field->code));
+                return $column->format(fn ($state, Model&MutableModel $record) => $record->maskedSecret($field->code));
 
             default:
                 return $column;
@@ -506,7 +507,7 @@ abstract class ManageRecords extends Component
             }
 
             if ($usage->isImmutableForSystemObjects) {
-                $input->disabled(fn (array $data, ?Model $record) => $record instanceof ModelWithFields && $record->isSystem());
+                $input->disabled(fn (array $data, ?Model $record) => $record instanceof MutableModel && $record->isSystem());
             }
 
             $inputs[$input->statePath] = $input;
@@ -561,7 +562,7 @@ abstract class ManageRecords extends Component
 
             case DomainFieldType::TYPE_DATETIME:
                 return Input::make($field->code, Input::TYPE_DATETIME)
-                    ->formatState(fn (?Model $record) => $record instanceof ModelWithFields ? $record->getDateTime($field->code)?->format(static::DATETIME_INPUT_FORMAT) : null)
+                    ->formatState(fn (?Model $record) => $record instanceof MutableModel ? $record->getDateTime($field->code)?->format(static::DATETIME_INPUT_FORMAT) : null)
                     ->dehydrateState(fn ($state) => ModelWithFields::toDateTimeValue($state));
 
             case DomainFieldType::TYPE_MONEY:
@@ -570,7 +571,7 @@ abstract class ManageRecords extends Component
             case DomainFieldType::TYPE_SECRET:
                 return Input::make($field->code, Input::TYPE_SECRET)
                     ->formatState(fn () => null)
-                    ->placeholder(fn (array $data, ?Model $record) => static::keepsSecret($record, $field->code) && $record instanceof ModelWithFields ? $record->maskedSecret($field->code) : null)
+                    ->placeholder(fn (array $data, ?Model $record) => static::keepsSecret($record, $field->code) && $record instanceof MutableModel ? $record->maskedSecret($field->code) : null)
                     ->helper(fn (array $data, ?Model $record) => static::keepsSecret($record, $field->code) ? __('mutable-content-daisyui::ui.secret_kept') : null);
 
             case DomainFieldType::TYPE_ICON:
@@ -648,7 +649,7 @@ abstract class ManageRecords extends Component
 
         $input = Input::make($field->code, Input::TYPE_MONEY)
             ->formatState(function (?Model $record) use ($field, $currency) {
-                $money = $record instanceof ModelWithFields ? $record->getMoney($field->code) : null;
+                $money = $record instanceof MutableModel ? $record->getMoney($field->code) : null;
 
                 return [
                     Money::KEY_AMOUNT => $money?->amount,
@@ -670,7 +671,7 @@ abstract class ManageRecords extends Component
      */
     protected static function keepsSecret(?Model $record, string $path): bool
     {
-        return $record instanceof ModelWithFields && filled(data_get($record->getAttribute('fields'), $path));
+        return $record instanceof MutableModel && filled(data_get($record->getAttribute('fields'), $path));
     }
 
     /**
@@ -818,7 +819,7 @@ abstract class ManageRecords extends Component
         return $payload;
     }
 
-    protected function persist(ModelWithFields $record): void
+    protected function persist(Model&MutableModel $record): void
     {
         $relation = $this->parentRelation();
 
@@ -836,8 +837,15 @@ abstract class ManageRecords extends Component
         return trim($this->path.'/'.$action, '/');
     }
 
+    protected function prepareLog(Model $record, string $action): void
+    {
+        if (method_exists($record, 'withLogContext')) {
+            $record->withLogContext($this->logComment($action))->user(auth()->id());
+        }
+    }
+
     // delete section
-    public function canDelete(ModelWithFields $record): bool
+    public function canDelete(Model&MutableModel $record): bool
     {
         return !$record->isSystem();
     }
@@ -845,7 +853,7 @@ abstract class ManageRecords extends Component
     /**
      * Why the record cannot be deleted, shown to the user; null if it can.
      */
-    protected function deleteDeniedReason(ModelWithFields $record): ?string
+    protected function deleteDeniedReason(Model&MutableModel $record): ?string
     {
         return null;
     }
@@ -864,7 +872,7 @@ abstract class ManageRecords extends Component
         return [];
     }
 
-    public function recordUrl(ModelWithFields $record): ?string
+    public function recordUrl(Model&MutableModel $record): ?string
     {
         return null;
     }
@@ -872,7 +880,7 @@ abstract class ManageRecords extends Component
     /**
      * Title of the record for the user, e.g. in the delete confirmation.
      */
-    public function recordTitle(ModelWithFields $record): string
+    public function recordTitle(Model&MutableModel $record): string
     {
         return ObjectHelper::getTitle($record);
     }
@@ -1207,7 +1215,7 @@ abstract class ManageRecords extends Component
     /**
      * @return array<string, mixed>
      */
-    public function formData(?ModelWithFields $record): array
+    public function formData((Model&MutableModel)|null $record): array
     {
         $data = [];
 
@@ -1229,7 +1237,7 @@ abstract class ManageRecords extends Component
         $record ??= $this->makeRecord();
 
         $record->fill($this->payload($record));
-        $record->withLogContext($this->logComment($isNew ? 'create' : 'edit'))->user(auth()->id());
+        $this->prepareLog($record, $isNew ? 'create' : 'edit');
 
         try {
             SaveHelper::save(fn () => $this->persist($record));
@@ -1258,7 +1266,7 @@ abstract class ManageRecords extends Component
             return;
         }
 
-        $record->withLogContext($this->logComment('destroy'))->user(auth()->id());
+        $this->prepareLog($record, 'destroy');
 
         try {
             SaveHelper::save(fn () => $record->delete());
@@ -1276,7 +1284,7 @@ abstract class ManageRecords extends Component
         return $input->isDisabled($this->data, $this->formRecord());
     }
 
-    public function formRecord(): ?ModelWithFields
+    public function formRecord(): (Model&MutableModel)|null
     {
         return $this->getRecord();
     }
@@ -1286,7 +1294,7 @@ abstract class ManageRecords extends Component
         $this->dispatch('mutable-content-notify', type: $type, title: $title, body: $body);
     }
 
-    public function renderCell(Column $column, ModelWithFields $record): string|Htmlable|null
+    public function renderCell(Column $column, Model&MutableModel $record): string|Htmlable|null
     {
         return $column->render($record);
     }

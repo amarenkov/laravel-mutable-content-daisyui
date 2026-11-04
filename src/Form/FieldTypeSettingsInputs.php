@@ -7,6 +7,7 @@ use Closure;
 
 use Illuminate\Database\Eloquent\Model;
 
+use Amarenkov\MutableContent\Contracts\MutableModel;
 use Amarenkov\MutableContent\Domain\Field\Field;
 use Amarenkov\MutableContent\Domain\Field\Lov\Type as FieldType;
 use Amarenkov\MutableContent\Domain\Field\TypeSettings;
@@ -14,7 +15,6 @@ use Amarenkov\MutableContent\Domain\LovRegistry;
 
 use Amarenkov\MutableContent\Models\Lov\Currency;
 
-use Amarenkov\MutableContent\Models\ModelWithFields;
 
 use Amarenkov\MutableContent\ValueObjects\Money;
 
@@ -64,7 +64,7 @@ class FieldTypeSettingsInputs
 
     protected static function recordSetting(?Model $record, string $setting): mixed
     {
-        if (!$record instanceof ModelWithFields) {
+        if (!$record instanceof MutableModel) {
             return null;
         }
 

@@ -7,6 +7,15 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-04
+
+### Changed
+
+- **Breaking:** `ManageRecords` and the field and LOV screens manage any model implementing `MutableModel`, so a model on the core traits gets the screens. Methods take and return `Model&MutableModel` instead of `ModelWithFields`: an override of `recordUrl()`, `recordTitle()`, `canDelete()`, `deleteDeniedReason()`, `persist()`, `formData()`, `renderCell()` or `Column::getState()`/`render()` has to change the type of its parameter. `ensureModelWithFields()` is now `ensureMutableModel()`.
+- The change log author and comment are set only on a model that has the change log (`prepareLog()`).
+
+Requires `amarenkov/laravel-mutable-content` ^0.8.
+
 ## [0.4.3] - 2026-10-21
 
 ### Added
@@ -111,7 +120,8 @@ Initial release.
 - Lucide icons: the interface, field type icons kept in the package (an icon set for the item in
   the admin panel takes precedence) and icon fields storing Lucide icon names.
 
-[Unreleased]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.4.3...HEAD
+[Unreleased]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.4.3...v0.5.0
 [0.4.3]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.4.0...v0.4.1
