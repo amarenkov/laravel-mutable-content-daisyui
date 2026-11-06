@@ -7,6 +7,10 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-06
+
+Requires `amarenkov/laravel-mutable-content` ^0.9.
+
 ### Removed
 
 - `ManageRecords::isInputDisabled()`, `displayUnit()` and `formatValueObject()`.
@@ -124,7 +128,8 @@ Initial release.
 - Lucide icons: the interface, field type icons kept in the package (an icon set for the item in
   the admin panel takes precedence) and icon fields storing Lucide icon names.
 
-[Unreleased]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.4.3...v0.5.0
 [0.4.3]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.4.2...v0.4.3
 [0.4.2]: https://github.com/amarenkov/laravel-mutable-content-daisyui/compare/v0.4.1...v0.4.2
