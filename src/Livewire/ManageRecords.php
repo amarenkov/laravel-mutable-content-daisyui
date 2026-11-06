@@ -25,6 +25,7 @@ use Amarenkov\MutableContent\Contracts\MutableModel;
 use Amarenkov\MutableContent\Domain\Field\Field;
 use Amarenkov\MutableContent\Domain\Field\Lov\Type as DomainFieldType;
 use Amarenkov\MutableContent\Domain\Field\TypeSettings;
+use Amarenkov\MutableContent\Domain\Field\Types\FieldTypes;
 use Amarenkov\MutableContent\Domain\LovRegistry;
 
 use Amarenkov\MutableContent\Helpers\DatabaseHelper;
@@ -35,10 +36,8 @@ use Amarenkov\MutableContent\Helpers\RuleHelper;
 use Amarenkov\MutableContent\Models\ModelWithFields;
 use Amarenkov\MutableContent\Models\Lov\Currency;
 
-use Amarenkov\MutableContent\ValueObjects\Density;
 use Amarenkov\MutableContent\ValueObjects\FieldValue;
 use Amarenkov\MutableContent\ValueObjects\Money;
-use Amarenkov\MutableContent\ValueObjects\SurfaceDensity;
 
 use Amarenkov\MutableContentDaisyUi\Exceptions\SaveFailed;
 use Amarenkov\MutableContentDaisyUi\Form\Input;
@@ -279,13 +278,9 @@ abstract class ManageRecords extends Component
             case DomainFieldType::TYPE_AREA:
             case DomainFieldType::TYPE_VOLUME:
             case DomainFieldType::TYPE_DURATION:
-                return $column->numeric()->format(static::unitFormatter($field));
-
             case DomainFieldType::TYPE_DENSITY:
-                return $column->numeric()->format(fn ($state) => static::formatValueObject(Density::class, $state));
-
             case DomainFieldType::TYPE_SURFACE_DENSITY:
-                return $column->numeric()->format(fn ($state) => static::formatValueObject(SurfaceDensity::class, $state));
+                return $column->numeric()->format(static::unitFormatter($field));
 
             case DomainFieldType::TYPE_DATE:
                 return $column->format(fn ($state) => static::formatDate($state));
@@ -441,25 +436,13 @@ abstract class ManageRecords extends Component
      */
     protected function unlistedCodesFilter(array $fields): ?Filter
     {
-        $codeFields = array_filter($fields, fn (Field $field) => in_array($field->fieldType, [DomainFieldType::TYPE_LOV_ITEM, DomainFieldType::TYPE_OBJECT], true) && TypeSettings::allowsUnlistedCodes($field));
+        $codeFields = ObjectHelper::fieldsWithUnlistedCodes($fields);
 
         if (!$codeFields) {
             return null;
         }
 
-        $hasUnlisted = function (Builder $query) use ($codeFields) {
-            $lovRegistry = app(LovRegistry::class);
-
-            foreach ($codeFields as $field) {
-                $column = 'fields->'.$field->code;
-
-                $codes = $field->fieldType === DomainFieldType::TYPE_OBJECT
-                    ? ObjectHelper::codesQuery($field->objectClass)
-                    : array_map('strval', array_keys($lovRegistry->getLovItemsOptions($field->lovCode)));
-
-                $query->orWhere(fn (Builder $query) => $query->whereNotNull($column)->whereNotIn($column, $codes));
-            }
-        };
+        $hasUnlisted = fn (Builder $query) => ObjectHelper::whereHasUnlistedCode($query, $codeFields);
 
         return Filter::ternary(
             'unlisted_lov_codes',
@@ -693,15 +676,10 @@ abstract class ManageRecords extends Component
         return is_scalar($state) ? (string)$state : null;
     }
 
-    protected static function displayUnit(Field $field): string
-    {
-        return TypeSettings::getValue($field, TypeSettings::DISPLAY_UNIT) ?? TypeSettings::getUnitClass($field->fieldType)::baseUnit();
-    }
-
     protected function unitInput(Field $field): Input
     {
         $class = TypeSettings::getUnitClass($field->fieldType);
-        $unit = static::displayUnit($field);
+        $unit = TypeSettings::displayUnit($field);
 
         $input = Input::make($field->code, Input::TYPE_NUMBER)->suffix($class::unitLabel($unit));
 
@@ -955,30 +933,9 @@ abstract class ManageRecords extends Component
         return $date ? $date->format(static::DATE_DISPLAY_FORMAT) : $state;
     }
 
-    /**
-     * @param class-string $class
-     */
-    protected static function formatValueObject(string $class, mixed $state): ?string
-    {
-        try {
-            return $class::fromFieldValue($state)?->format();
-        } catch (InvalidArgumentException) {
-            return is_scalar($state) ? (string)$state : null;
-        }
-    }
-
     protected static function unitFormatter(Field $field): Closure
     {
-        $class = TypeSettings::getUnitClass($field->fieldType);
-        $unit = static::displayUnit($field);
-
-        return function ($state) use ($class, $unit) {
-            try {
-                return $class::fromFieldValue($state)?->format(unit: $unit);
-            } catch (InvalidArgumentException) {
-                return is_scalar($state) ? (string)$state : null;
-            }
-        };
+        return fn ($state) => FieldTypes::display($field, $state);
     }
 
     // state section
@@ -1277,11 +1234,6 @@ abstract class ManageRecords extends Component
         }
 
         $this->notify('success', __('mutable-content-daisyui::ui.deleted'));
-    }
-
-    public function isInputDisabled(Input $input): bool
-    {
-        return $input->isDisabled($this->data, $this->formRecord());
     }
 
     public function formRecord(): (Model&MutableModel)|null
